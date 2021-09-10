@@ -1,5 +1,7 @@
 import pandas as pd
+import matplotlib as mpl
 from matplotlib import pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
 import random as random
 
 #________________________________________________________________________________________
@@ -21,6 +23,30 @@ ipList = dataFramePrime['User IP'].values.tolist()  #
 launageList = dataFramePrime['What Language Do You Speak?'].values.tolist()  #
 spamMe = dataFramePrime['Would you like to learn more?'].values.tolist()  #
 # tells me which ones are unique ips
+
+
+def ProblemA():
+    print()
+    vegiTotals = dataFramePrime.iloc[:, 1:33].notnull().sum(axis=0)
+
+    vegiTotals = vegiTotals.sort_values(ascending=True)
+    vegiTotals = vegiTotals.to_frame()
+
+    print("________________________________________________")
+                #    r           g                   b
+    color = (random.random(), random.random(), random.random())
+    test = vegiTotals.plot.bar(color=color, legend=None)
+    bars = [rect for rect in test.get_children() if isinstance(rect, mpl.patches.Rectangle)]
+
+    counter = 0
+    for x in bars:
+        color = (random.random(), random.random(), random.random())
+        bars[counter].set_color(color)
+        counter = counter + 1
+
+    bars[(len(bars) - 1)].set_color('white')
+    plt.xticks( rotation='vertical')
+    plt.show()
 
 def UniversalSort(searchList, probE = None):
     uniqueSearch = []
@@ -60,7 +86,7 @@ def UniversalSort(searchList, probE = None):
         if spam == "y":
             print("________________________________________________________________________________________________________________________________________________________________________________________________")
             for x in dfStorage:
-                print(uniqueSearch[counter], "  Total: ", len(dfStorage[counter]))
+                print(uniqueSearch[counter], "  Total Survays: ", len(dfStorage[counter]), " Unique Launages: ", dfStorage[counter]['What Language Do You Speak?'].nunique())
                 totalLen = len(dfStorage[counter])
                 #print(numb - dfStorage[0].isnull().sum(axis=0))
 
@@ -93,6 +119,16 @@ def UniversalSort(searchList, probE = None):
 
 def main():
     #UniversalSort(ipList, probE=True)
-    UniversalSort(launageList, probE=True)
-
+    ProblemA()
+    UniversalSort(ipList, probE=True)
+    print("\n\n")
+    print("_________________________________________________________________________________")
+    print("_________________________________________________________________________________")
+    print("_________________________________________________________________________________")
+    print("_________________________________________________________________________________")
+    print("\n\n\n\n\n")
+    print("_________________________________________________________________________________")
+    print("Information sored by lauangage")
+    print("_________________________________________________________________________________")
+    UniversalSort(ipList, probE=True)
 main()
