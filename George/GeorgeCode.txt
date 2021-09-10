@@ -5,9 +5,9 @@ import random as random
 #________________________________________________________________________________________
 # Name: George Shea     ßeta
 # Date Created: 9/9/21
-# Date Modified 9/9/21
+# Date Modified 10/9/21
 # project part 2 this project is parsing through an excel spreadsheet to produce usable data
-# Version 1.0
+# Version 1.1
 #
 #
 #________________________________________________________________________________________
@@ -15,8 +15,11 @@ import random as random
 path = pd.ExcelFile('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/project_1_part_2.xlsx')
 dataFramePrime = pd.read_excel(path)
 
+dataFramePrime.replace("Nope", None).replace("No", None)
+
 ipList = dataFramePrime['User IP'].values.tolist()  #
 launageList = dataFramePrime['What Language Do You Speak?'].values.tolist()  #
+spamMe = dataFramePrime['Would you like to learn more?'].values.tolist()  #
 # tells me which ones are unique ips
 
 def UniversalSort(searchList, probE = None):
@@ -55,7 +58,7 @@ def UniversalSort(searchList, probE = None):
         spam = input("Would you like to print will be a bit messy y/n\n")
         counter = 0
         if spam == "y":
-
+            print("________________________________________________________________________________________________________________________________________________________________________________________________")
             for x in dfStorage:
                 print(uniqueSearch[counter], "  Total: ", len(dfStorage[counter]))
                 totalLen = len(dfStorage[counter])
@@ -72,7 +75,15 @@ def UniversalSort(searchList, probE = None):
                 horizontal_stack = pd.concat([output, percent], axis=1)
 
                 print(str(horizontal_stack).replace("                    ", "________________________________________________________________________________________________________________________________________________________________________________________________"))
+                print()
+                print(uniqueSearch[counter], "I Would Love To Learn More")
+                print("________________________________________________________________________________________________________________________________________________________________________________________________")
+                print(dfStorage[counter].iloc[:, [0,34,35,36]].loc[dfStorage[counter]['Would you like to learn more?'].notna()])
+                print("\n\n")
+                print("________________________________________________________________________________________________________________________________________________________________________________________________")
 
+
+                print()
                 counter = counter + 1
         else:
             print("Ok.")
