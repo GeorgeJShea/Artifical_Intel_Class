@@ -1,63 +1,77 @@
 import pandas as pd
 import matplotlib as mpl
 from matplotlib import pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap
 import random as random
 
 #________________________________________________________________________________________
 # Name: George Shea     ßeta
 # Date Created: 9/9/21
-# Date Modified 10/9/21
+# Date Modified 14/9/21
 # project part 2 this project is parsing through an excel spreadsheet to produce usable data
-# Version 1.1
+# Version 1.2
 #
 #
 #________________________________________________________________________________________
 
+# Be Sure to update file path
 path = pd.ExcelFile('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/project_1_part_2.xlsx')
-dataFramePrime = pd.read_excel(path)
-
-dataFramePrime.replace("Nope", None).replace("No", None)
-
-ipList = dataFramePrime['User IP'].values.tolist()  #
-launageList = dataFramePrime['What Language Do You Speak?'].values.tolist()  #
-spamMe = dataFramePrime['Would you like to learn more?'].values.tolist()  #
-# tells me which ones are unique ips
+dataFramePrime = pd.read_excel(path)                        #Allows for sheet reading
 
 
-def ProblemA():
+dataFramePrime.replace("Nope", None).replace("No", None) #Formating
+
+ipList = dataFramePrime['User IP'].values.tolist()                           # Gets ip for the people
+launageList = dataFramePrime['What Language Do You Speak?'].values.tolist()  # Get langs for the people
+spamMe = dataFramePrime['Would you like to learn more?'].values.tolist()     # The please spam me button
+
+# Graphs out for problem A and B
+def DualSearch(probA = None, probB = None):
     print()
-    vegiTotals = dataFramePrime.iloc[:, 1:33].notnull().sum(axis=0)
 
-    vegiTotals = vegiTotals.sort_values(ascending=True)
-    vegiTotals = vegiTotals.to_frame()
+    #Prints Out Vegis Count
+    if(probA == True):
+        dualOutput = dataFramePrime.iloc[:, 1:33].notnull().sum(axis=0)
+        dualOutput = dualOutput.sort_values(ascending=True)
+        dualOutput = dualOutput.to_frame()
 
+        test = dualOutput.plot.bar(legend=None)
+        plt.title("Problem A")
+        plt.xlabel("Crops")
+
+    #Prints Out Launages Count
+    elif(probB == True):
+        plt.title("Problem B")
+        plt.xlabel("Languages")
+        dualOutput = dataFramePrime['What Language Do You Speak?'].replace("日本語", "Japanese").replace("中文", "Chinese") .value_counts()
+        test = dualOutput.plot.bar(legend=None)
     print("________________________________________________")
-                #    r           g                   b
-    color = (random.random(), random.random(), random.random())
-    test = vegiTotals.plot.bar(color=color, legend=None)
-    bars = [rect for rect in test.get_children() if isinstance(rect, mpl.patches.Rectangle)]
 
+    # Makes Bar Graph pretty
+    plt.ylabel("Number Of People")
+    bars = [rect for rect in test.get_children() if isinstance(rect, mpl.patches.Rectangle)]
     counter = 0
+    #Assigns random colors to graph
     for x in bars:
         color = (random.random(), random.random(), random.random())
         bars[counter].set_color(color)
         counter = counter + 1
-
     bars[(len(bars) - 1)].set_color('white')
+
     plt.xticks( rotation='vertical')
     plt.show()
 
-def UniversalSort(searchList, probE = None):
+# Sorts Data ands prints it out
+def UniversalSort(searchList, printerTru = None):
     uniqueSearch = []
     counter = 0
+
+    # Creates Unique list
     for x in searchList:
         tag = searchList[counter]
-        # Check for if there is a new vegi
+        # Check for if there is a new item
         if (not (str(tag) in uniqueSearch)):
             uniqueSearch.append(str(tag))
         counter = counter + 1
-
 
     dfStorage = []
     # each list within organized holder is a unique value based on organzaiton cretiria
@@ -65,62 +79,67 @@ def UniversalSort(searchList, probE = None):
     counterTwo = 0
     for x in uniqueSearch:
         dfTemp = pd.DataFrame(columns = dataFramePrime.columns.values.tolist())
-        #columns
         counter = 0
         for y in searchList:
-            # goes through entire list to sort into 1/n unique ips
+            # Goes Through and assigns each item to its corsponding list
             if(searchList[counter] == uniqueSearch[counterTwo]):
                 #Magic Syntax https://www.geeksforgeeks.org/how-to-add-one-row-in-an-existing-pandas-dataframe/
                 dfTemp.loc[len(dfTemp.index)] = dataFramePrime.iloc[counter]
-            # goes through entire data set
+            # Goes Through entire dataset
             counter = counter + 1
 
-        # goes through unique ip test to match
+        # Goes Through each list
         counterTwo = counterTwo + 1
 
         dfStorage.append(dfTemp)
 
-    def ProblemE():
+    # nothing crazy just prints stuff
+    def Printer():
         spam = input("Would you like to print will be a bit messy y/n\n")
+        extraInfo = input("Would you like to see email intrested persons y/n\n")
         counter = 0
         if spam == "y":
+
             print("________________________________________________________________________________________________________________________________________________________________________________________________")
             for x in dfStorage:
+                # Prints out total survays for the area and how many launages are spoken by search
                 print(uniqueSearch[counter], "  Total Survays: ", len(dfStorage[counter]), " Unique Launages: ", dfStorage[counter]['What Language Do You Speak?'].nunique())
                 totalLen = len(dfStorage[counter])
-                #print(numb - dfStorage[0].isnull().sum(axis=0))
 
+                # Gets vegi votes and vegi vote precentage
                 output = dfStorage[counter].iloc[:, 1:33].notnull().sum(axis=0)
                 percent = ((dfStorage[counter].iloc[:, 1:33].notnull().sum(axis=0)) / totalLen) * 100
 
+                # Sorts them in ascending order
                 percent = percent.sort_values(ascending=True)
                 output = output.sort_values(ascending=True)
-                percent = round(percent)
-                #print((round(percent)))
+                percent = round(percent)    # Rounds to get rid of end bit
 
+                # combinds votes and vote precents into one image
                 horizontal_stack = pd.concat([output, percent], axis=1)
 
                 print(str(horizontal_stack).replace("                    ", "________________________________________________________________________________________________________________________________________________________________________________________________"))
                 print()
-                print(uniqueSearch[counter], "I Would Love To Learn More")
-                print("________________________________________________________________________________________________________________________________________________________________________________________________")
-                print(dfStorage[counter].iloc[:, [0,34,35,36]].loc[dfStorage[counter]['Would you like to learn more?'].notna()])
-                print("\n\n")
-                print("________________________________________________________________________________________________________________________________________________________________________________________________")
-
-
+                # the please spam me list
+                if(extraInfo == "y"):
+                    print(uniqueSearch[counter], "I Would Love To Learn More")
+                    print("________________________________________________________________________________________________________________________________________________________________________________________________")
+                    print(dfStorage[counter].iloc[:, [0,34,35,36]].loc[dfStorage[counter]['Would you like to learn more?'].notna()])
+                    print("\n\n")
+                    print("________________________________________________________________________________________________________________________________________________________________________________________________")
                 print()
                 counter = counter + 1
         else:
             print("Ok.")
 
-    if (probE == True):
-        ProblemE()
+    if (printerTru == True):
+        Printer()
 
 def main():
-    #UniversalSort(ipList, probE=True)
-    ProblemA()
-    UniversalSort(ipList, probE=True)
+    DualSearch(probA=True)
+    DualSearch(probB=True)
+
+    UniversalSort(ipList, printerTru=True)
     print("\n\n")
     print("_________________________________________________________________________________")
     print("_________________________________________________________________________________")
@@ -130,5 +149,5 @@ def main():
     print("_________________________________________________________________________________")
     print("Information sored by lauangage")
     print("_________________________________________________________________________________")
-    UniversalSort(ipList, probE=True)
+    UniversalSort(launageList, printerTru=True)
 main()
