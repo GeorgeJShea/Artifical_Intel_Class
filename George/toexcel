@@ -1,0 +1,176 @@
+import pandas as pd
+import matplotlib as mpl
+from matplotlib import pyplot as plt
+import random as random
+import xlsxwriter as xlsx
+#________________________________________________________________________________________
+# Name: George Shea     ßeta
+# Date Created: 9/9/21
+# Date Modified 14/9/21
+# project part 2 this project is parsing through an excel spreadsheet to produce usable data
+# Version 1.2
+#
+#
+#________________________________________________________________________________________
+
+# Be Sure to update file path
+path = pd.ExcelFile('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/project_1_part_2.xlsx')
+dataFramePrime = pd.read_excel(path)                        #Allows for sheet reading
+
+
+writer = pd.ExcelWriter('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/outputData.xlsx')
+file = xlsx.Workbook('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/outputData.xlsx')
+
+
+counter = 0
+for x in dataFramePrime:
+    dataFramePrime.iloc[:, counter] = dataFramePrime.iloc[:, counter].replace({"Nope" : None }, regex=True).replace({"No" : None}, regex=True).replace({"Nan" : None}, regex=True).replace({"لا" : None}, regex=True)
+    counter = counter + 1
+
+ipList = dataFramePrime['User IP'].values.tolist()                           # Gets ip for the people
+launageList = dataFramePrime['What Language Do You Speak?'].values.tolist()  # Get langs for the people
+spamMe = dataFramePrime['Would you like to learn more?'].values.tolist()     # The please spam me button
+
+# Graphs out for problem A and B
+def DualSearch(probA = None, probB = None):
+    print()
+
+    #Prints Out Vegis Count
+    if(probA == True):
+        dualOutput = dataFramePrime.iloc[:, 1:33].notnull().sum(axis=0)
+        dualOutput = dualOutput.sort_values(ascending=True)
+        dualOutput = dualOutput.to_frame()
+
+        test = dualOutput.plot.bar(legend=None)
+        plt.title("Problem A")
+        plt.xlabel("Crops")
+
+    #Prints Out Launages Count
+    elif(probB == True):
+        plt.title("Problem B")
+        plt.xlabel("Languages")
+        dualOutput = dataFramePrime['What Language Do You Speak?'].replace("日本語", "Japanese").replace("中文", "Chinese") .value_counts()
+        test = dualOutput.plot.bar(legend=None)
+    print("________________________________________________")
+
+    # Makes Bar Graph pretty
+    plt.ylabel("Number Of People")
+    bars = [rect for rect in test.get_children() if isinstance(rect, mpl.patches.Rectangle)]
+    counter = 0
+    #Assigns random colors to graph
+    for x in bars:
+        color = (random.random(), random.random(), random.random())
+        bars[counter].set_color(color)
+        counter = counter + 1
+    bars[(len(bars) - 1)].set_color('white')
+
+    plt.xticks( rotation='vertical')
+    plt.show()
+
+# Sorts Data ands prints it out
+def UniversalSort(searchList, printerTru = None):
+    uniqueSearch = []
+    counter = 0
+
+    # Creates Unique list
+    for x in searchList:
+        tag = searchList[counter]
+        # Check for if there is a new item
+        if (not (str(tag) in uniqueSearch)):
+            uniqueSearch.append(str(tag))
+        counter = counter + 1
+
+    dfStorage = []
+    # each list within organized holder is a unique value based on organzaiton cretiria
+    counter = 0
+    counterTwo = 0
+    for x in uniqueSearch:
+        dfTemp = pd.DataFrame(columns = dataFramePrime.columns.values.tolist())
+        counter = 0
+        for y in searchList:
+            # Goes Through and assigns each item to its corsponding list
+            if(searchList[counter] == uniqueSearch[counterTwo]):
+                #Magic Syntax https://www.geeksforgeeks.org/how-to-add-one-row-in-an-existing-pandas-dataframe/
+                dfTemp.loc[len(dfTemp.index)] = dataFramePrime.iloc[counter]
+            # Goes Through entire dataset
+            counter = counter + 1
+
+        # Goes Through each list
+        counterTwo = counterTwo + 1
+
+        dfStorage.append(dfTemp)
+
+    # nothing crazy just prints stuff
+    def Printer():
+
+        counter = 0
+        spam = "y"
+        if spam == "y":
+            ipdataFrame = []
+            survayFrame = []
+            voteFrame = []
+
+            print("________________________________________________________________________________________________________________________________________________________________________________________________")
+            for x in dfStorage:
+                ipdataFrame.append((dfStorage[counter].iloc[:, [0,34,35,36,41]].loc[dfStorage[counter]['Would you like to learn more?'].notnull()]))
+
+
+                # Prints out total survays for the area and how many launages are spoken by search
+                print(uniqueSearch[counter], "  Total Survays: ", len(dfStorage), " Unique Launages: ", dfStorage[counter]['What Language Do You Speak?'].nunique())
+
+                survayString = str(str(len(dfStorage[counter])) + "Ip: " + str(uniqueSearch[counter]))
+                #survayFrame.append(pd.concat([len(dfStorage[counter]), uniqueSearch[counter]], axis=0))
+
+                totalLen = len(dfStorage[counter])
+
+                # Gets vegi votes and vegi vote precentage
+                output = dfStorage[counter].iloc[:, 1:33].notnull().sum(axis=0)
+                percent = ((dfStorage[counter].iloc[:, 1:33].notnull().sum(axis=0)) / totalLen) * 100
+
+                # Sorts them in ascending order
+                percent = percent.sort_values(ascending=False)
+                output = output.sort_values(ascending=False)
+                #percent = round(percent)    # Rounds to get rid of end bit
+
+                # combinds votes and vote precents into one image
+
+                voteFrame.append(pd.concat([output, round(percent)], axis=1))
+
+                temp = uniqueSearch[counter]
+                temp = "        " + temp
+                voteFrame[counter].iloc[:, 1] = voteFrame[counter].iloc[:, 1].astype(str) + temp
+                pd.concat([output, round(percent)], axis=1).to_excel(writer, str("Votes For " + uniqueSearch[counter]))
+
+                #
+                #
+                blerg = random.randrange(1, 1000000)
+                dfStorage[counter].iloc[:, [0,34,35,36,43]].loc[dfStorage[counter]['Would you like to learn more?'].notnull()].to_excel(writer, str("SpamMe " + uniqueSearch[counter]))
+
+
+                counter = counter + 1
+
+
+        else:
+            print("Ok.")
+
+    if (printerTru == True):
+        Printer()
+
+def main():
+
+    #DualSearch(probA=True)
+    #DualSearch(probB=True)
+
+    UniversalSort(ipList, printerTru=True)
+    print("\n")
+    print("_________________________________________________________________________________")
+    print("_________________________________________________________________________________")
+    print("\n\n")
+    print("_________________________________________________________________________________")
+    print("Information sored by lauangage")
+    print("_________________________________________________________________________________")
+    UniversalSort(launageList, printerTru=True)
+    writer.save()
+main()
+
+
