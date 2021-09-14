@@ -17,8 +17,11 @@ import random as random
 path = pd.ExcelFile('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/project_1_part_2.xlsx')
 dataFramePrime = pd.read_excel(path)                        #Allows for sheet reading
 
+counter = 0
+for x in dataFramePrime:
+    dataFramePrime.iloc[:, counter] = dataFramePrime.iloc[:, counter].replace({"Nope" : None }, regex=True).replace({"No" : None}, regex=True).replace({"Nan" : None}, regex=True).replace({"لا" : None}, regex=True)
 
-dataFramePrime.replace("Nope", None).replace("No", None) #Formating
+    counter = counter + 1
 
 ipList = dataFramePrime['User IP'].values.tolist()                           # Gets ip for the people
 launageList = dataFramePrime['What Language Do You Speak?'].values.tolist()  # Get langs for the people
@@ -111,8 +114,8 @@ def UniversalSort(searchList, printerTru = None):
                 percent = ((dfStorage[counter].iloc[:, 1:33].notnull().sum(axis=0)) / totalLen) * 100
 
                 # Sorts them in ascending order
-                percent = percent.sort_values(ascending=True)
-                output = output.sort_values(ascending=True)
+                percent = percent.sort_values(ascending=False)
+                output = output.sort_values(ascending=False)
                 percent = round(percent)    # Rounds to get rid of end bit
 
                 # combinds votes and vote precents into one image
@@ -124,7 +127,7 @@ def UniversalSort(searchList, printerTru = None):
                 if(extraInfo == "y"):
                     print(uniqueSearch[counter], "I Would Love To Learn More")
                     print("________________________________________________________________________________________________________________________________________________________________________________________________")
-                    print(dfStorage[counter].iloc[:, [0,34,35,36]].loc[dfStorage[counter]['Would you like to learn more?'].notna()])
+                    print(dfStorage[counter].iloc[:, [0,34,35,36]].loc[dfStorage[counter]['Would you like to learn more?'].notnull()])
                     print("\n\n")
                     print("________________________________________________________________________________________________________________________________________________________________________________________________")
                 print()
@@ -136,8 +139,8 @@ def UniversalSort(searchList, printerTru = None):
         Printer()
 
 def main():
-    DualSearch(probA=True)
-    DualSearch(probB=True)
+    #DualSearch(probA=True)
+    #DualSearch(probB=True)
 
     UniversalSort(ipList, printerTru=True)
     print("\n\n")
