@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.metrics import mean_squared_error as MSE
 import math
+import itertools
 
 #________________________________________________________________________________________
 # Name: George Shea     ßeta
@@ -9,6 +10,7 @@ import math
 # Project 1 part  will be using a linear regestion algretyhm to predict
 # Version 1.5
 #________________________________________________________________________________________
+# part do that k score thing
 
 pathTwo = "C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/experience_salary_data.csv"
 dataFramePrime = pd.read_csv(pathTwo)
@@ -16,24 +18,91 @@ dataFramePrime = pd.read_csv(pathTwo)
 indepedent = dataFramePrime['YearsExperience'].values.tolist()                           # Gets ip for the people
 dependent = dataFramePrime['Salary'].values.tolist()  # Get langs for the people
 
+kNAverage = 0
+
 # Splits lists into given test and train data based on given precentage
-def Split(split = None):
+def Split(split = None, KSplit = None):
     divsionPoint = round(len(indepedent) * split)
 
     indiTrainA = indepedent[:divsionPoint]
     indiTestA = indepedent[divsionPoint:]
 
-    indiTrainB = dependent[:divsionPoint]
-    indiTestB = dependent[divsionPoint:]
+    depndiTrainB = dependent[:divsionPoint]
+    denpdiTestB = dependent[divsionPoint:]
 
     # Returns split data to regexcalc
-    return indiTrainA, indiTrainB, indiTestA, indiTestB
+    return indiTrainA, depndiTrainB, indiTestA, denpdiTestB
+
+def FourKSplit(PartA = None, PartB = None, PartC = None ):
+    print()
+    #   A B C
+    # 1 - - t
+    # 2 - t -
+    # 3 t - -
+    divsionPoint = round(len(indepedent) * .33)
+    divsionPoint2 = round(len(indepedent) * .66)
+
+    ''' functional eye sore
+    trainPartOneDependent = dependent[:divsionPoint] + dependent[divsionPoint:divsionPoint2]
+    trainPartTwoDependent = dependent[:divsionPoint] + dependent[divsionPoint2:]
+    trainPartThreeDependent = dependent[divsionPoint:divsionPoint2] + dependent[divsionPoint2:]
+
+    trainPartOneIndepedent = indepedent[:divsionPoint] + indepedent[divsionPoint:divsionPoint2]
+    trainPartTwoIndepedent = indepedent[:divsionPoint] + indepedent[divsionPoint2:]
+    trainPartThreeIndepedent = indepedent[divsionPoint:divsionPoint2] + indepedent[divsionPoint2:]
+    '''
+
+    if(PartA == True):
+        return indepedent[:divsionPoint] + indepedent[divsionPoint:divsionPoint2], dependent[:divsionPoint] + dependent[divsionPoint:divsionPoint2], indepedent[:divsionPoint], dependent[:divsionPoint]
+    elif(PartB == True):
+        return indepedent[:divsionPoint] + indepedent[divsionPoint2:], dependent[:divsionPoint] + dependent[divsionPoint2:], indepedent[divsionPoint:divsionPoint2], dependent[divsionPoint:divsionPoint2]
+    elif(PartC == True):
+        return indepedent[divsionPoint:divsionPoint2] + indepedent[divsionPoint2:], dependent[:divsionPoint] + dependent[divsionPoint2:], indepedent[divsionPoint2:], dependent[divsionPoint2:]
+    return
+
+def KSplit(splitValue = None):
+    splitValue = round(len(indepedent)/splitValue)
+    counter = splitValue
+    # - a b c d f
+    # 1 - - - - t
+    # 2 - - - t -
+    # 3 - - t - -
+    # 4 - t - - -
+    # 5 t - - - -
+
+    listIndependent = [indepedent[i:i + splitValue] for i in range(0, len(indepedent), splitValue)]
+    listDepedent = [dependent[i:i + splitValue] for i in range(0, len(dependent), splitValue)]
+    listIndependentReset = listIndependent
+    listDepedentReset = listDepedent
+
+    print(listIndependent)
+    for x in listIndependent:
+        testIndependent = listIndependent.pop(counter)
+        testDependent = listDepedent.pop(counter)
+
+        list(itertools.chain.from_iterable(listIndependent.pop(counter)))
+        list(itertools.chain.from_iterable(listDepedent.pop(counter)))
+        return list(itertools.chain.from_iterable(listIndependent.pop(counter))), list(itertools.chain.from_iterable(listDepedent.pop(counter))), testIndependent, testDependent
+
+    # return these values
+    # 1 independent train
+    # 2 dependent train
+    # 3 independent test
+    # 4 dependent test
 
 # Does the regex calculations and compares it to the scikit-learn
-def RegexCalc(precent):
+def RegexCalc(precent = None, PartA = None, PartB = None, PartC = None ):
     #Indepedent, Dependent are the training data
     #While The Tests are the test data          Both are already split into there respective groups
-    indepedent, dependent, indepedentTest, dependentTest = Split(precent)
+
+    if(precent != None):
+        indepedent, dependent, indepedentTest, dependentTest = Split(precent)
+    if(PartA == True):
+        indepedent, dependent, indepedentTest, dependentTest = FourKSplit(PartA=True)
+    elif(PartB == True):
+        indepedent, dependent, indepedentTest, dependentTest = FourKSplit(PartB=True)
+    elif(PartC == True):
+        indepedent, dependent, indepedentTest, dependentTest = FourKSplit(PartC=True)
 
     indiMean = 0
     dependiMean = 0
@@ -113,4 +182,19 @@ def main():
     print("################################################################")
     RegexCalc(.70)
 
+    print(" - - t ")
+    print("################################################################")
+    RegexCalc(PartA=True)
+
+    print(" - t - ")
+    print("################################################################")
+    RegexCalc(PartB=True)
+
+    print(" t - - ")
+    print("################################################################")
+    RegexCalc(PartC=True)
+
+    KSplit(2)
+    KSplit(3)
+    KSplit(5)
 main()
