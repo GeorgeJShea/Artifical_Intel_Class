@@ -1,153 +1,146 @@
 import pandas as pd
-import matplotlib as mpl
-from matplotlib import pyplot as plt
-import random as random
-import xlsxwriter as xlsx
+from sklearn.metrics import mean_squared_error as MSE
+import math
+import itertools
 
 #________________________________________________________________________________________
 # Name: George Shea     ßeta
-# Date Created: 9/9/21
-# Date Modified 17/9/21
-# project part 2 this project is parsing through an excel spreadsheet to produce usable data
-# Version 1.4
+# Date Created: 28/9/21
+# Date Modified 28/9/21
+# Project 1 part  will be using a linear regestion algretyhm to predict
+# Version 1.5
 #________________________________________________________________________________________
+# part do that k score thing
 
-# Path In
-path = pd.ExcelFile('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/project_1_part_2.xlsx')
-dataFramePrime = pd.read_excel(path)                        #Allows for sheet reading
+pathTwo = "C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/experience_salary_data.csv"
+dataFramePrime = pd.read_csv(pathTwo)
 
+indepedent2 = dataFramePrime['YearsExperience'].values.tolist()                           # Gets ip for the people
+dependent2 = dataFramePrime['Salary'].values.tolist()  # Get langs for the people
 
-#Path out
-writer = pd.ExcelWriter('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/outputData.xlsx')
-file = xlsx.Workbook('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/outputData.xlsx')
+# Splits lists into given test and train data based on given precentage
 
+def KSplit(splitValue=None):
+    splitValue = round(len(indepedent2) / (splitValue - 1))
 
-#Replaces any answer in the negative with nan
-counter = 0
-for x in dataFramePrime:
-    dataFramePrime.iloc[:, counter] = dataFramePrime.iloc[:, counter].replace({"Nope" : None }, regex=True).replace({"No" : None}, regex=True).replace({"Nan" : None}, regex=True).replace({"لا" : None}, regex=True)
-    counter = counter + 1
+    mseAverage = 0
+    rsmeAverage = 0
+    mseSciAverage = 0
+    rsmeSciAverage = 0
+    # - a b c d f
+    # 1 - - - - t
+    # 2 - - - t -
+    # 3 - - t - -
+    # 4 - t - - -
+    # 5 t - - - -
 
-#Used Lists
-ipList = dataFramePrime['User IP'].values.tolist()                           # Gets ip for the people
-launageList = dataFramePrime['What Language Do You Speak?'].values.tolist()  # Get langs for the people
-spamMe = dataFramePrime['Would you like to learn more?'].values.tolist()     # The please spam me button
+    listIndependent = [indepedent2[i:i + splitValue] for i in range(0, len(indepedent2), splitValue)]
+    listDepedent = [dependent2[i:i + splitValue] for i in range(0, len(dependent2), splitValue)]
 
-# Graphs out for problem A and B
-def DualSearch(probA = None, probB = None):
-    print()
+    counter = len(listIndependent) - 1
+    inverseCounter = 1
+    for x in listIndependent:
+        print("=============K", inverseCounter)
+        testIndependent = listIndependent.copy().pop(counter)
+        testDependent = listDepedent.copy().pop(counter)
+        inverseCounter = inverseCounter + 1
+        counter = counter - 1
+        mseAverageTemp, rsmeAverageTemp, mseSciAverageTemp, rsmeSciAverageTemp = RegexCalc(list(itertools.chain.from_iterable(listIndependent)), list(itertools.chain.from_iterable(listDepedent)), testIndependent, testDependent)
+        mseAverage, rsmeAverage, mseSciAverage, rsmeSciAverage = mseAverage + mseAverageTemp, rsmeAverage + rsmeAverageTemp, mseSciAverage + mseSciAverageTemp, rsmeSciAverage + rsmeSciAverageTemp
+    mseAverage, rsmeAverage, mseSciAverage, rsmeSciAverage = mseAverage/len(listIndependent), rsmeAverage/len(listIndependent), mseSciAverage/len(listIndependent), rsmeSciAverage/len(listIndependent)
+    print("=============K", inverseCounter)
+    print("################################################################")
+    print("K-", len(listIndependent) + 1, "Average MSE Score:              ", round(mseAverage, 2))
+    print("K-", len(listIndependent) + 1, "Average RSME Score:             ", round(rsmeAverage, 2))
+    print("################################################################")
 
-    #Prints Out Vegis Count
-    if(probA == True):
-        dualOutput = dataFramePrime.iloc[:, 1:33].notnull().sum(axis=0)
-        dualOutput = dualOutput.sort_values(ascending=True)
-        dualOutput = dualOutput.to_frame()
+    print("K-", len(listIndependent) + 1, "Average MSE Score Scikit-learn: ", round(mseSciAverage, 2))
+    print("K-", len(listIndependent) + 1, "Average RSME Score Scikit-learn: ", round(rsmeSciAverage, 2))
+    print("################################################################")
+    print("\n\n")
 
-        test = dualOutput.plot.bar(legend=None)
-        plt.title("Problem A")
-        plt.xlabel("Crops")
+def RegexCalc(indepedent, dependent, indepedentTest, dependentTest):
+        # Indepedent, Dependent are the training data
+        # While The Tests are the test data          Both are already split into there respective groups
 
-    #Prints Out Launages Count
-    elif(probB == True):
-        plt.title("Problem B")
-        plt.xlabel("Languages")
-        dualOutput = dataFramePrime['What Language Do You Speak?'].replace("日本語", "Japanese").replace("中文", "Chinese") .value_counts()
-        test = dualOutput.plot.bar(legend=None)
-    print("________________________________________________")
-
-    # Makes Bar Graph pretty
-    plt.ylabel("Number Of People")
-    bars = [rect for rect in test.get_children() if isinstance(rect, mpl.patches.Rectangle)]
-    counter = 0
-    #Assigns random colors to graph
-    for x in bars:
-        color = (random.random(), random.random(), random.random())
-        bars[counter].set_color(color)
-        counter = counter + 1
-    bars[(len(bars) - 1)].set_color('white')
-
-    plt.xticks( rotation='vertical')
-    plt.show()
-
-# Sorts Data ands prints it out
-def UniversalSort(searchList, printerTru = None):
-    uniqueSearch = []
-    counter = 0
-
-    # Creates List of unique items
-    for x in searchList:
-        tag = searchList[counter]
-        # Check for if there is a new item
-        if (not (str(tag) in uniqueSearch)):
-            uniqueSearch.append(str(tag))
-        counter = counter + 1
-
-    dfStorage = []
-    # Each list within organized holder is a unique value based on organzaiton cretiria
-    counter = 0
-    counterTwo = 0
-    for x in uniqueSearch:
-        dfTemp = pd.DataFrame(columns = dataFramePrime.columns.values.tolist())
+        indiMean = 0
+        dependiMean = 0
         counter = 0
-        for y in searchList:
-            # Goes Through and assigns each item to its corsponding list
-            if(searchList[counter] == uniqueSearch[counterTwo]):
-                #Magic Syntax https://www.geeksforgeeks.org/how-to-add-one-row-in-an-existing-pandas-dataframe/
-                dfTemp.loc[len(dfTemp.index)] = dataFramePrime.iloc[counter]
-            # Goes Through entire dataset
+        # Calculates Mean for indipedent and dependent
+        for x in indepedent:
+            indiMean = indepedent[counter] + indiMean
+            dependiMean = dependent[counter] + dependiMean
+            counter = counter + 1
+        indiMean = indiMean / len(indepedent)
+        dependiMean = dependiMean / len(dependent)
+
+        # calculates Slope
+        partA = 0  # (Xi -x ) * (Yi - x) Index of independent(x) in mean of independent(x) * Index of dependent(x) in mean of dependent(x)
+        partB = 0  # (Xi -  x)^2 Index of independent(x) in mean of independent(x) sqaured
+        counter = 0
+        for x in indepedent:
+            partA = partA + (indepedent[counter] - indiMean) * (dependent[counter] - dependiMean)  # denomator
+            partB = partB + (indepedent[counter] - indiMean) ** 2  # numartor
             counter = counter + 1
 
-        # Goes Through each list
-        counterTwo = counterTwo + 1
+        slope = partA / partB  # Generates slope
 
-        dfStorage.append(dfTemp)
+        intercept = dependiMean - slope * indiMean  # Generets intercept
 
-    # Sends organzied things to excel
-    def Printer():
-
+        # calculates Pearsons R Score
         counter = 0
-        print("________________________________________________________________________________________________________________________________________________________________________________________________")
-        for x in dfStorage:
-            # Prints out total survays for the area and how many launages are spoken by search
-            print(uniqueSearch[counter], " Unique Votes: ", len(dfStorage[counter]))
+        RTop = 0
+        RBottom = 0
+        for x in indepedent:
+            RTop = RTop + ((indepedent[counter] - indiMean) * (dependent[counter] - dependiMean))
+            RBottom = RBottom + math.sqrt(
+                ((indepedent[counter] - indiMean) ** 2 * (dependent[counter] - dependiMean) ** 2))
+        R = RTop / RBottom
 
-            # used to get precents
-            totalLen = len(dfStorage[counter])
+        # "Predicts"
+        def Predict():
+            counter = 0
+            total = 0
+            totalPrecent = 0
+            outputArray = []  # Grabs each prediction
+            for x in dependentTest:
+                output = slope * indepedentTest[counter] + intercept  # prediction is output
+                outputArray.append(output)
 
-            # Gets vegi votes and vegi vote precentage
-            output = dfStorage[counter].iloc[:, 1:33].notnull().sum(axis=0)
-            percent = ((dfStorage[counter].iloc[:, 1:33].notnull().sum(axis=0)) / totalLen) * 100
+                total = total + (output - dependentTest[counter]) ** 2  # Generates MSE Score onse finished looping
 
-            # Sorts them in decsending order
-            percent = percent.sort_values(ascending=False)
-            output = output.sort_values(ascending=False)
-            #percent = round(percent)    # Rounds to get rid of end bit
-            tempDataFrame = pd.concat([output, round(percent)], axis=1)
+                totalPrecent = totalPrecent + output / abs(dependentTest[counter])  # Generates Average Precentage off prediction
+                counter = counter + 1
 
-            # Renames coloumns to be logical
-            tempDataFrame.columns = ("Votes", "Precents")
-            # Writes to excel file
-            tempDataFrame.to_excel(writer, str("Votes For " + uniqueSearch[counter]))
+            avgPrediction = totalPrecent / len(dependentTest) * 100  # Turns Average Prediction into prectentage
 
-            #Please Spam me data
-            dfStorage[counter].iloc[:, [0,34,35,36,43]].loc[dfStorage[counter]['Would you like to learn more?'].notnull()].to_excel(writer, str("SpamMe " + uniqueSearch[counter]))
+            # Detirmins if guess over or under and shows accordingly
+            if (avgPrediction >= 100):
+                avgPrediction = avgPrediction - 100
+                print("On Average Predicts:                   ", round(avgPrediction, 2), "% Over")
+            elif (avgPrediction <= 100):
+                avgPrediction = 100 - avgPrediction
+                print("On Average Predicts:                   ", round(avgPrediction, 2), "% Under")
 
-            counter = counter + 1
+            print("________________________________________________________________")
+            print("MSE Score:              ", round((total / (len(dependentTest))), 2))
+            print("RSME Score:             ", round((math.sqrt(total / (len(dependentTest)))), 2))
+            print("________________________________________________________________")
 
-    if (printerTru == True):
-        Printer()
+            print("MSE Score Scikit-learn: ", round(MSE(dependentTest, outputArray), 2))
+            print("RSME Score Scikit-learn: ", round(math.sqrt(MSE(dependentTest, outputArray)), 2))
+            print("________________________________________________________________")
+            print("\n\n")
+            return round(total / len(dependentTest), 2), round(math.sqrt(total / len(dependentTest)), 2), round(MSE(dependentTest, outputArray), 2), round(math.sqrt(MSE(dependentTest, outputArray)), 2)
+        one, two, three, four = Predict()
+        return one, two, three, four
 
 def main():
-    DualSearch(probA=True)
-    DualSearch(probB=True)
-
-    UniversalSort(ipList, printerTru=True)
-    print("\n")
-    print("_________________________________________________________________________________")
     print()
-    print("_________________________________________________________________________________")
-    print("Information sored by lauangage")
-    print("_________________________________________________________________________________")
-    UniversalSort(launageList, printerTru=True)
-    writer.save()
+    print("KN Split ")
+    print("################################################################")
+    value = int(input("Please Enter a Value: \n"))
+    if(value <= 0):
+        value = 4
+    KSplit(value)
 main()
