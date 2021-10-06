@@ -3,14 +3,16 @@ from sklearn.utils import shuffle
 from math import sqrt
 import numpy as np
 from matplotlib import pyplot as plt
+import time
 
 #________________________________________________________________________________________
 # Name: George Shea     ßeta
 # Date Created: 6/10/21
 # Date Modified 6/10/21
 # Lab 2 find knn for give data
-# Version 2.0
+# Version 2.1
 #________________________________________________________________________________________
+
 
 
 path = pd.ExcelFile('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/fruits_classification.xlsx')
@@ -47,7 +49,7 @@ def FindFriends(train, test, k=None, dataStart=None, dataEnd=None):
         trainCounter = 0
         # and then does k nearest to each item in train data.
         for index, rowTrain in train.iterrows():
-            # K nearest neighbor 3, 6 default for fruits
+            # K nearest neighbor 3, 6 default for fruit
             # start value is start of useable info and end is the final collum
             value = 0
             s = dataStart
@@ -73,7 +75,8 @@ def FindFriends(train, test, k=None, dataStart=None, dataEnd=None):
             i = i + 1
 
         # Runs most frequent and returns most frequent in case of tie returns first encountered.
-        guess = MostFrequent(topFriends)
+        guess = MostFrequent(topFriends, f[:k])
+
         if(test.iloc[testCounter, 1] == guess):
             matchCount = matchCount + 1
 
@@ -81,10 +84,36 @@ def FindFriends(train, test, k=None, dataStart=None, dataEnd=None):
     # finnaly returns average
     return round(matchCount / len(test) * 100, 2)
 
-def MostFrequent(listCount):
-    # first encountered item in list will be returend in case of Apple, apple, Orange Orange. Apple would be returned
-    mostCommon = max(listCount, key=listCount.count)
-    return mostCommon
+def MostFrequent(listCount, fI):
+    # creates tuple of knn score and item
+    mergedList = [(fI[i], listCount[i]) for i in range(0, len(fI))]
+    output = {}
+
+    # Created dic and sorts by item
+    for x, y in mergedList:
+        if y in output:
+            output[y].append((x, y))
+        else:
+            output[y] = [(x, y)]
+
+    test = 0
+    counter = 0
+    averageNearScore = []
+    # Adds all same type knn scores together
+    for key, value in output.items():
+        counter = 0
+        for x in value:
+            # addes knn scores together bases on same item
+            test = test + value[counter][0]
+            counter = counter + 1
+        # averages knn scores from n items
+        averageNearScore.append(test/len(value))
+
+    # gets lowests average as that is the collests items
+    # if there is a matching item somehow || it will take the istance of the first matching item from said set of matching items
+    minnium = min(averageNearScore)
+    # gets dic keys index into based on index of shortest item
+    return list(output.keys())[averageNearScore.index(minnium)]
 
 
 # Lets make toast used for running findfriends mutiple times.
@@ -116,16 +145,19 @@ def ScreamingProcesser(iterations, kNear):
     plt.show()
 
     return averageList
+
 def main():
+    now = time.time()
     print("More iterations take longer")
     value =  int(input("Please enter iteration: \n    "))
     print("Loading... . ")
     print("_________________________________________________________")
-    averageList = ScreamingProcesser(value, 10)
+    averageList = ScreamingProcesser(value, 20)
     print("_________________________________________________________")
     index = max(averageList)
     print("Most Accurate KNN")
     print("|| Neighbors || ", averageList.index(index), " || Average Accuracy || ", max(averageList), "%")
     print("_________________________________________________________")
-    print("Complete")
+    later = time.time()
+    print("Complete ||    || Time elasped || ", round((later - now)/60, 2), " Minutes")
 main()
