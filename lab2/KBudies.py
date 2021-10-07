@@ -4,26 +4,32 @@ from math import sqrt
 import numpy as np
 from matplotlib import pyplot as plt
 import time
+import random
+from collections import Counter
 
 #________________________________________________________________________________________
 # Name: George Shea     ßeta
 # Date Created: 6/10/21
 # Date Modified 6/10/21
 # Lab 2 find knn for give data
-# Version 2.1
+# Version 2.0
 #________________________________________________________________________________________
 
 
 
 path = pd.ExcelFile('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/fruits_classification.xlsx')
+#path = pd.ExcelFile('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/Book1.xlsx')
 dataFramePrime = pd.read_excel(path)                        #Allows for sheet reading
 
-
 def Primer(k=None, dataStart=None, dataEnd=None):
-    # Randomises the Data And Splits it into a 60/40 split
-    df = shuffle(dataFramePrime)    #randomises data
-    train = df.sample(frac=0.6)     #splits
-    test = df.drop(train.index)     #splits
+    endOf = dataFramePrime.iloc[:, dataStart:dataEnd+1]
+    endOf = (endOf - endOf.mean()) / endOf.std()
+    startOF = dataFramePrime.iloc[:, :dataStart]
+
+    result = startOF.join(endOf)
+    normalizedDf = shuffle(result)    #randomises data
+    train = normalizedDf.sample(frac=0.6)     #splits best resutls apear to be closer to higher ratio of training data
+    test = normalizedDf.drop(train.index)     #splits this is due to the algrothem being "lazy"
 
     #Find friends up the ladder
     average = FindFriends(train, test, k, dataStart, dataEnd)
@@ -77,6 +83,7 @@ def FindFriends(train, test, k=None, dataStart=None, dataEnd=None):
         # Runs most frequent and returns most frequent in case of tie returns first encountered.
         guess = MostFrequent(topFriends, f[:k])
 
+        #------------------------ change to 2
         if(test.iloc[testCounter, 1] == guess):
             matchCount = matchCount + 1
 
@@ -107,12 +114,16 @@ def MostFrequent(listCount, fI):
             test = test + value[counter][0]
             counter = counter + 1
         # averages knn scores from n items
-        averageNearScore.append(test/len(value))
+        averageNearScore.append(test/len(value)/ len(value))
 
     # gets lowests average as that is the collests items
     # if there is a matching item somehow || it will take the istance of the first matching item from said set of matching items
     minnium = min(averageNearScore)
     # gets dic keys index into based on index of shortest item
+
+    data = Counter(listCount)
+    test = data.most_common(1)[0][0]
+
     return list(output.keys())[averageNearScore.index(minnium)]
 
 
@@ -126,6 +137,7 @@ def ScreamingProcesser(iterations, kNear):
         runningTotal = 0
         iterations = iterationsReset
         while iterations > 0:
+            # 3  and 7 is what i want here -----------------------------------
             temp = Primer(kNear, 3, 6)
             runningTotal = runningTotal + temp
             iterations = iterations - 1
@@ -152,7 +164,7 @@ def main():
     value =  int(input("Please enter iteration: \n    "))
     print("Loading... . ")
     print("_________________________________________________________")
-    averageList = ScreamingProcesser(value, 20)
+    averageList = ScreamingProcesser(value, 10)
     print("_________________________________________________________")
     index = max(averageList)
     print("Most Accurate KNN")
