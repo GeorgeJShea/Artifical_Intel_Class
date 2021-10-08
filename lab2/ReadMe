@@ -1,0 +1,13 @@
+KNN 
+
+edit the following line with your data path
+path = ('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/fruits_classification.xlsx')
+
+edit this line to set your data range and what your classifer is
+averageList = ScreamingProcesser(iterations=value, classifer=1, startData=3, endData=6, kNear=10)
+
+Built by george
+
+Features
+Normalize Data
+Iterations
