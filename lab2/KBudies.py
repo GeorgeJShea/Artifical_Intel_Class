@@ -11,18 +11,20 @@ from collections import Counter
 # Date Created: 6/10/21
 # Date Modified 8/10/21
 # Lab 2 find knn for give data
-# Version 2.2
+# Version 2.21
 #________________________________________________________________________________________
 
 
 
-path = pd.ExcelFile('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/fruits_classification.xlsx')
-#path = ('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/report.csv')
-#path = pd.ExcelFile('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/Book1.xlsx')
-#dataFramePrime = pd.read_excel(path)                        #Allows for sheet reading
+# put your path here
+path = ('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/fruits_classification.xlsx')
 
-
-dataFramePrime = pd.read_excel(path)
+extentsion = path.split(".")[1]
+if (extentsion == "xlsx"):
+    path = pd.ExcelFile(path)
+    dataFramePrime = pd.read_excel(path)
+if (extentsion == "csv"):
+    dataFramePrime = pd.read_csv(path)
 
 def Primer(k=None, dataStart=None, dataEnd=None, classifer=None):
     endOf = dataFramePrime.iloc[:, dataStart:dataEnd+1]
