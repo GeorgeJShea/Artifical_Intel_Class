@@ -4,38 +4,41 @@ from math import sqrt
 import numpy as np
 from matplotlib import pyplot as plt
 import time
-import random
 from collections import Counter
 
 #________________________________________________________________________________________
 # Name: George Shea     ßeta
 # Date Created: 6/10/21
-# Date Modified 6/10/21
+# Date Modified 8/10/21
 # Lab 2 find knn for give data
-# Version 2.0
+# Version 2.2
 #________________________________________________________________________________________
 
 
 
 path = pd.ExcelFile('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/fruits_classification.xlsx')
+#path = ('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/report.csv')
 #path = pd.ExcelFile('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/Book1.xlsx')
-dataFramePrime = pd.read_excel(path)                        #Allows for sheet reading
+#dataFramePrime = pd.read_excel(path)                        #Allows for sheet reading
 
-def Primer(k=None, dataStart=None, dataEnd=None):
+
+dataFramePrime = pd.read_excel(path)
+
+def Primer(k=None, dataStart=None, dataEnd=None, classifer=None):
     endOf = dataFramePrime.iloc[:, dataStart:dataEnd+1]
     endOf = (endOf - endOf.mean()) / endOf.std()
     startOF = dataFramePrime.iloc[:, :dataStart]
-
     result = startOF.join(endOf)
     normalizedDf = shuffle(result)    #randomises data
+
     train = normalizedDf.sample(frac=0.6)     #splits best resutls apear to be closer to higher ratio of training data
     test = normalizedDf.drop(train.index)     #splits this is due to the algrothem being "lazy"
 
     #Find friends up the ladder
-    average = FindFriends(train, test, k, dataStart, dataEnd)
+    average = FindFriends(train, test, k, dataStart, dataEnd, classifer)
     return average
 
-def FindFriends(train, test, k=None, dataStart=None, dataEnd=None):
+def FindFriends(train, test, k=None, dataStart=None, dataEnd=None, classifer=None):
     # 1 goes through test data and does k nearest for each training data
     # 2 using knn makes a guess
     # 3 finnaly average correct guess verses total
@@ -77,14 +80,14 @@ def FindFriends(train, test, k=None, dataStart=None, dataEnd=None):
         #Get x nearest neighbors ie top scores
         i = 0
         while i <= k:
-            topFriends.append(train.iloc[fI[i], 1])
+            topFriends.append(train.iloc[fI[i], classifer])
             i = i + 1
 
         # Runs most frequent and returns most frequent in case of tie returns first encountered.
         guess = MostFrequent(topFriends, f[:k])
 
         #------------------------ change to 2
-        if(test.iloc[testCounter, 1] == guess):
+        if(test.iloc[testCounter, classifer] == guess):
             matchCount = matchCount + 1
 
         testCounter = testCounter + 1
@@ -128,7 +131,7 @@ def MostFrequent(listCount, fI):
 
 
 # Lets make toast used for running findfriends mutiple times.
-def ScreamingProcesser(iterations, kNear):
+def ScreamingProcesser(iterations=None, kNear=None, startData=None, endData=None, classifer=None):
     iterationsReset = iterations    # used for reset iterations
     kNearReset = kNear + 1          #Formatting
     averageList = []                #Stores averages for each knn
@@ -138,7 +141,7 @@ def ScreamingProcesser(iterations, kNear):
         iterations = iterationsReset
         while iterations > 0:
             # 3  and 7 is what i want here -----------------------------------
-            temp = Primer(kNear, 3, 6)
+            temp = Primer(kNear, startData, endData, classifer)
             runningTotal = runningTotal + temp
             iterations = iterations - 1
 
@@ -164,7 +167,7 @@ def main():
     value =  int(input("Please enter iteration: \n    "))
     print("Loading... . ")
     print("_________________________________________________________")
-    averageList = ScreamingProcesser(value, 10)
+    averageList = ScreamingProcesser(iterations=value, classifer=1, startData=3, endData=6, kNear=10)
     print("_________________________________________________________")
     index = max(averageList)
     print("Most Accurate KNN")
