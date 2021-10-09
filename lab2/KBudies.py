@@ -11,20 +11,19 @@ import time                                 # Used for calculating duration of c
 # Date Created: 6/10/21
 # Date Modified 8/10/21
 # Lab 2 find knn for give data
-# Version 2.3
+# Version 2.21
 #________________________________________________________________________________________
 
 # put your path here
-path = ('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/fruits_classification.xlsx')
 
-extentsion = path.split(".")[1]
-if (extentsion == "xlsx"):
-    path = pd.ExcelFile(path)
-    dataFramePrime = pd.read_excel(path)
-if (extentsion == "csv"):
-    dataFramePrime = pd.read_csv(path)
 
-def Primer(k=None, dataStart=None, dataEnd=None, classifer=None, split=None):
+def Primer(k=None, dataStart=None, dataEnd=None, classifer=None, split=None, path=None):
+    extentsion = path.split(".")[1]
+    if (extentsion == "xlsx"):
+        path = pd.ExcelFile(path)
+        dataFramePrime = pd.read_excel(path)
+    if (extentsion == "csv"):
+        dataFramePrime = pd.read_csv(path)
     # Cuts out defined data
     endOf = dataFramePrime.iloc[:, dataStart:dataEnd+1]
     # Runs normaliztion on defined data
@@ -129,7 +128,7 @@ def MostFrequent(listCount, fI):
     return list(output.keys())[averageNearScore.index(minnium)]
 
 # Lets make toast used for running findfriends mutiple times.
-def ScreamingProcesser(iterations=None, kNear=None, startData=None, endData=None, classifer=None, printVal=None, split=None):
+def ScreamingProcesser(iterations=None, kNear=None, startData=None, endData=None, classifer=None, printVal=None, split=None, path=None):
     iterationsReset = iterations    # used for reset iterations
     kNearReset = kNear + 1          #Formatting
     averageList = []                #Stores averages for each knn
@@ -139,7 +138,7 @@ def ScreamingProcesser(iterations=None, kNear=None, startData=None, endData=None
         iterations = iterationsReset
         while iterations > 0:
             # 3  and 7 is what i want here -----------------------------------
-            temp = Primer(kNear, startData, endData, classifer, split)
+            temp = Primer(kNear, startData, endData, classifer, split, path)
             runningTotal = runningTotal + temp
             iterations = iterations - 1
 
@@ -167,7 +166,8 @@ def main():
     value =  int(input("Please enter iteration: \n    "))
     print("Loading... . ")
     print("_________________________________________________________")
-    averageList = ScreamingProcesser(iterations=value, classifer=1, startData=3, endData=6, kNear=10, split=.6, printVal=True)
+    path = ('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/fruits_classification.xlsx')
+    averageList = ScreamingProcesser(iterations=value, classifer=1, startData=3, endData=6, kNear=10, split=.6, printVal=True, path=path)
     print("_________________________________________________________")
     index = max(averageList)
     print("Most Accurate KNN")
