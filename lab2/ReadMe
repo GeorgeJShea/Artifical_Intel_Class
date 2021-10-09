@@ -6,8 +6,11 @@ path = ('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/fruits_clas
 edit this line to set your data range and what your classifer is
 averageList = ScreamingProcesser(iterations=value, classifer=1, startData=3, endData=6, kNear=10)
 
+iterations: how many times knn will run
+classifer: is what you are trying to predict
+startData, EndData: intial starting point of data and end point
+KNear: how many k nearest neighbors it will grab it will iterate starting from that to 1
+path: set path to this currently supports xslm and csv
+
 Built by george
 
-Features
-Normalize Data
-Iterations
