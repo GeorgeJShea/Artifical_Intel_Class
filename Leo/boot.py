@@ -48,12 +48,15 @@ def NewSheetFromDictionary(Dictionary, WorksheetName, ColumnName): #Create a new
 #['CropName'] = NumberVotes
 TotalVotes = {}
 CropTypes = ['Basil','Beets','Bell Pepper','Broccoli','Brussels Sprouts','Carrots','Cauliflower','Cayenne Pepper','Cherry Tomatoes','Cilantro','Collards','Garlic','Green Beans','Green Cabbage','Habanero Pepper','Head Lettuce','Jalapeño Pepper','Kale','Loose Leaf Lettuce','Muskmelon','Okra','Onions','Potatoes','Pumpkins','Radishes','Red Cabbage','Roma Tomatoes','Slicer Tomatoes','Swiss Chard','Tomatillos','Turnips','Watermelon','Winter Squash']
+print(MainDataFrame.groupby(CropTypes))
 for CropType in CropTypes:
     Votes = MainDataFrame.groupby(CropType)
-    print(type(Votes.size()[0]))
+    #print(type(Votes.size()[0]))
     AddToDictionary(TotalVotes, CropType, Votes.size()[0])
-print(TotalVotes)
+#print(TotalVotes)
 NewSheetFromDictionary(TotalVotes, "Sheet 1", "Total Votes")
+
+
 #CropVotes = MainDataFrame.groupby(['
 
 #Number of responses for each language at each site location. 2
