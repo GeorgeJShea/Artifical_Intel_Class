@@ -161,21 +161,8 @@ def ScreamingProcesser(iterations=None, kNear=None, startData=None, endData=None
     return averageList[1:len(averageList)]
 
 def main():
-    now = time.time()
-    print("More iterations take longer")
-    value =  int(input("Please enter iteration: \n    "))
-    print("Loading... . ")
-    print("_________________________________________________________")
-    path = ('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/fruits_classification.xlsx')
-    averageList = ScreamingProcesser(iterations=value, classifer=1, startData=3, endData=6, kNear=10, split=.6, printVal=True, path=path)
-    print("_________________________________________________________")
-    index = max(averageList)
-    print("Most Accurate KNN")
-    print("|| Neighbors || ", averageList.index(index), " || Average Accuracy || ", max(averageList), "%")
-    print("_________________________________________________________")
-    later = time.time()
-    print("Complete ||    || Time elasped || ", round((later - now)/60, 2), " Minutes")
-
+    #path = ('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/fruits_classification.xlsx')
+    #averageList = ScreamingProcesser(iterations=value, classifer=1, startData=3, endData=6, kNear=10, split=.6, printVal=True, path=path)
 
 if __name__ == '__main__':
     main()
