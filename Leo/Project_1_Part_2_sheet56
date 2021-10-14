@@ -1,0 +1,193 @@
+from datetime import time
+import pandas as pd
+import matplotlib as mpl
+from matplotlib import pyplot as plt
+import random as random
+import xlsxwriter as xlsx
+
+#________________________________________________________________________________________
+# Name: Leo Lee
+#________________________________________________________________________________________
+
+# Path In
+FolderPath = 'C:/Users/leeleoy/Documents/Special Topics/Project 1 - part 2/'
+path = pd.ExcelFile(FolderPath + 'project_1_part_2.xlsx')
+dataFramePrime = pd.read_excel(path)                        #Allows for sheet reading
+
+
+#Path out
+writer = pd.ExcelWriter(FolderPath+'outputData.xlsx')
+file = xlsx.Workbook(FolderPath+'outputData.xlsx')
+
+
+#Replaces any answer in the negative with nan
+counter = 0
+for x in dataFramePrime:
+    dataFramePrime.iloc[:, counter] = dataFramePrime.iloc[:, counter].replace({"Nope" : None }, regex=True).replace({"No" : None}, regex=True).replace({"Nan" : None}, regex=True).replace({"لا" : None}, regex=True)
+    counter = counter + 1
+
+#Used Lists
+ipList = dataFramePrime['User IP'].values.tolist()                           # Gets ip for the people
+launageList = dataFramePrime['What Language Do You Speak?'].values.tolist()  # Get langs for the people
+spamMe = dataFramePrime['Would you like to learn more?'].values.tolist()     # The please spam me button
+
+
+potato = []
+
+def ReturnVegieCount(DataFrame):
+    dualOutput = DataFrame.iloc[:, 1:33].notnull().sum(axis=0)
+    dualOutput = dualOutput.sort_values(ascending=True)
+    return dualOutput
+# Graphs out for problem A and B
+def DualSearch(probA = None, probB = None):
+    print()
+
+    #Prints Out Vegis Count
+    if(probA == True):
+        dualOutput = ReturnVegieCount(dataFramePrime)
+        dualOutput = dualOutput.to_frame()
+        test = dualOutput.plot.bar(legend=None)
+        plt.title("Problem A")
+        plt.xlabel("Crops")
+
+    #Prints Out Launages Count
+    elif(probB == True):
+        plt.title("Problem B")
+        plt.xlabel("Languages")
+        dualOutput = dataFramePrime['What Language Do You Speak?'].replace("日本語", "Japanese").replace("中文", "Chinese") .value_counts()
+        test = dualOutput.plot.bar(legend=None)
+    print("________________________________________________")
+
+    # Makes Bar Graph pretty
+    plt.ylabel("Number Of People")
+    bars = [rect for rect in test.get_children() if isinstance(rect, mpl.patches.Rectangle)]
+    counter = 0
+    #Assigns random colors to graph
+    for x in bars:
+        color = (random.random(), random.random(), random.random())
+        bars[counter].set_color(color)
+        counter = counter + 1
+    bars[(len(bars) - 1)].set_color('white')
+
+    plt.xticks( rotation='vertical')
+    plt.show()
+
+    return dualOutput
+
+
+# Sorts Data ands prints it out
+def UniversalSort(searchList, printerTru = None):
+    uniqueSearch = []
+    counter = 0
+    sheetOne = []
+    sheetTwo = []
+    sheetThree = []
+    sheetFour = []
+    sheetFive = []
+
+    # Creates List of unique items
+    for x in searchList:
+        tag = searchList[counter]
+        # Check for if there is a new item
+        if (not (str(tag) in uniqueSearch)):
+            uniqueSearch.append(str(tag))
+        counter = counter + 1
+    #print(uniqueSearch)
+    dfStorage = []
+    # Each list within organized holder is a unique value based on organzaiton cretiria
+    counter = 0
+    counterTwo = 0
+    for x in uniqueSearch: #for each unique IP
+        dfTemp = pd.DataFrame(columns = dataFramePrime.columns.values.tolist()) #create a new dataframe for this unique IP
+        counter = 0
+        for y in searchList: #for each ip
+            # Goes Through and assigns each item to its corsponding list
+            if(searchList[counter] == uniqueSearch[counterTwo]): #if the IPs match
+                #Magic Syntax https://www.geeksforgeeks.org/how-to-add-one-row-in-an-existing-pandas-dataframe/
+                dfTemp.loc[len(dfTemp.index)] = dataFramePrime.iloc[counter] #add a new row to dfTemp that is the data of the matched IP row
+            # Goes Through entire dataset
+            counter = counter + 1
+
+        # Goes Through each list
+        counterTwo = counterTwo + 1
+
+        dfStorage.append(dfTemp) #add the new dataframe for use later
+        sheetOne.append(dfTemp) 
+    # Sends organzied things to excel
+    def Printer():
+        counter = 0
+        print("________________________________________________________________________________________________________________________________________________________________________________________________")
+        for x in dfStorage:
+            # Prints out total survays for the area and how many launages are spoken by search
+            print(uniqueSearch[counter], " Unique Votes: ", len(dfStorage[counter]))
+
+            # used to get precents
+            totalLen = len(dfStorage[counter])
+
+            # Gets vegi votes and vegi vote precentage
+            output = dfStorage[counter].iloc[:, 1:33].notnull().sum(axis=0)
+            percent = ((dfStorage[counter].iloc[:, 1:33].notnull().sum(axis=0)) / totalLen) * 100
+            potato.append(percent)
+            sheetFour.append(output)
+            sheetFive.append(percent)
+            # Sorts them in decsending order
+            percent = percent.sort_values(ascending=False)
+            output = output.sort_values(ascending=False)
+            #percent = round(percent)    # Rounds to get rid of end bit
+            tempDataFrame = pd.concat([output, round(percent)], axis=1)
+
+            # Renames coloumns to be logical
+            tempDataFrame.columns = ("Votes", "Precents")
+            # Writes to excel file
+
+            #Please Spam me data
+            banna = dfStorage[counter].iloc[:, [0, 34, 35, 36, 43]].loc[dfStorage[counter]['Would you like to learn more?'].notnull()]
+            sheetThree.append(banna)
+
+            counter = counter + 1
+
+    if (printerTru == True):
+        Printer()
+    return sheetOne, sheetThree, sheetFour, sheetFive, uniqueSearch
+
+
+def MakeSheets2and4(IPAddresses, Languages, IPGroupedData):
+    Sheet2 = []
+    Sheet4 = []
+    for i in range(len(IPAddresses)):
+        ThisIP = IPAddresses[i]
+        ThisIPData = IPGroupedData[i]
+        Sheet2Data = []
+        for Language in Languages:
+            LanguageCount = 0
+            for DataLanguage in ThisIPData['What Language Do You Speak?'].values:
+                if Language == DataLanguage:
+                    LanguageCount+=1
+            Sheet2Data.append(LanguageCount)
+        Sheet4Data = ReturnVegieCount(ThisIPData)
+        #print(type(Sheet4Data),Sheet4Data)
+        #print(ThisIP)
+        Sheet2.append(Sheet2Data)
+        Sheet4.append(Sheet4Data)
+    Sheet2Frame = pd.DataFrame(Sheet2,IPAddresses,Languages)
+    Sheet2Frame.to_excel(writer,"Sheet 2")
+    #print(Sheet2Frame)
+    Sheet4Frame = pd.DataFrame(Sheet4,IPAddresses)
+    Sheet4Frame = Sheet4Frame.swapaxes("columns","index")
+    Sheet4Frame.to_excel(writer,"Sheet 4")
+    #print(Sheet4Frame)
+    return
+
+def main():
+    fo = DualSearch(probA=True)
+    bar = DualSearch(probB=True)
+
+    sheetOneOutput, sheetThreeOutput, sheetFourOutput, sheetFiveOutput, IpAddresses = UniversalSort(ipList, printerTru=True)
+    _, _, _, _, Languages = UniversalSort(launageList)
+    MakeSheets2and4(IpAddresses, Languages, sheetOneOutput)
+
+    print("\n\n\n\n")
+    writer.save()
+main()
+
+
