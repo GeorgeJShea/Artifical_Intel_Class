@@ -18,15 +18,15 @@ dataFramePrime = pd.read_csv(pathTwo)
 indepedent2 = dataFramePrime['YearsExperience'].values.tolist()                           # Gets ip for the people
 dependent2 = dataFramePrime['Salary'].values.tolist()  # Get langs for the people
 
-# Splits lists into given test and train data based on given precentage
-
+# refer to chart
 def KSplit(splitValue=None):
-    splitValue = round(len(indepedent2) / (splitValue - 1))
+    splitValue = round(len(indepedent2) / (splitValue - 1)) # gets number of items that will be in each section of k
 
     mseAverage = 0
     rsmeAverage = 0
     mseSciAverage = 0
     rsmeSciAverage = 0
+    # visualization of the k-split
     # - a b c d f
     # 1 - - - - t
     # 2 - - - t -
@@ -34,19 +34,28 @@ def KSplit(splitValue=None):
     # 4 - t - - -
     # 5 t - - - -
 
+    # splits depedent and independent into lists based on splitvalue
     listIndependent = [indepedent2[i:i + splitValue] for i in range(0, len(indepedent2), splitValue)]
     listDepedent = [dependent2[i:i + splitValue] for i in range(0, len(dependent2), splitValue)]
 
+    # counter
     counter = len(listIndependent) - 1
-    inverseCounter = 1
+    inverseCounter = 1 # used for printing out things
     for x in listIndependent:
         print("=============K", inverseCounter)
-        testIndependent = listIndependent.copy().pop(counter)
-        testDependent = listDepedent.copy().pop(counter)
+
+        testIndependent = listIndependent.copy().pop(counter)   # creates the training set
+        testDependent = listDepedent.copy().pop(counter)        # creates the test set
+
         inverseCounter = inverseCounter + 1
         counter = counter - 1
+
+        # Runs msi, rsme cacluations and returms them to these temp values
         mseAverageTemp, rsmeAverageTemp, mseSciAverageTemp, rsmeSciAverageTemp = RegexCalc(list(itertools.chain.from_iterable(listIndependent)), list(itertools.chain.from_iterable(listDepedent)), testIndependent, testDependent)
+        # appends the temp values to there solid lists
         mseAverage, rsmeAverage, mseSciAverage, rsmeSciAverage = mseAverage + mseAverageTemp, rsmeAverage + rsmeAverageTemp, mseSciAverage + mseSciAverageTemp, rsmeSciAverage + rsmeSciAverageTemp
+
+    # just gets the average of them
     mseAverage, rsmeAverage, mseSciAverage, rsmeSciAverage = mseAverage/len(listIndependent), rsmeAverage/len(listIndependent), mseSciAverage/len(listIndependent), rsmeSciAverage/len(listIndependent)
     print("=============K", inverseCounter)
     print("################################################################")
