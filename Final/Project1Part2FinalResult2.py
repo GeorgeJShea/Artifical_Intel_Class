@@ -11,6 +11,7 @@ import matplotlib as mpl
 from matplotlib import pyplot as plt
 import random as random
 import xlsxwriter as xlsx
+from itertools import count
 
 #________________________________________________________________________________________
 # Name: George Shea
@@ -186,11 +187,16 @@ def UniversalSort(searchList, printerTru = None):
 
 #________________________________________________________________________________________
 # Name: Leo Lee
-def MakeSheets2and4(IPAddresses, Languages, IPGroupedData):
+def MakeSheet1():
+    VeggieSeries = ReturnVegieCount(dataFramePrime)
+    VeggieDataFrame = pd.DataFrame(VeggieSeries,columns=['Crop Counts'])
+    VeggieDataFrame = VeggieDataFrame.sort_values('Crop Counts',ascending=False)
+    VeggieDataFrame.to_excel(writer,"Sheet 1")
+    return
+
+def MakeSheets2(IPAddresses, Languages, IPGroupedData):
     Sheet2 = []
-    Sheet4 = []
     for i in range(len(IPAddresses)):
-        ThisIP = IPAddresses[i]
         ThisIPData = IPGroupedData[i]
         Sheet2Data = []
         for Language in Languages:
@@ -199,39 +205,42 @@ def MakeSheets2and4(IPAddresses, Languages, IPGroupedData):
                 if Language == DataLanguage:
                     LanguageCount+=1
             Sheet2Data.append(LanguageCount)
-        Sheet4Data = ReturnVegieCount(ThisIPData)
-        #print(type(Sheet4Data),Sheet4Data)
-        #print(ThisIP)
         Sheet2.append(Sheet2Data)
-        Sheet4.append(Sheet4Data)
     Sheet2Frame = pd.DataFrame(Sheet2,IPAddresses,Languages)
-    Sheet2Frame.to_excel(writer,"Sheet 2")
-    #print(Sheet2Frame)
+    Sheet2Name = "Sheet 2"
+    Sheet2Frame.to_excel(writer,Sheet2Name)
+    return
+
+def MakeSheet4(IPAddresses, IPGroupedData, UseCounterName = False, Counter = None):
+    Sheet4 = []
+    for i in range(len(IPAddresses)):
+        ThisIPData = IPGroupedData[i]
+        Sheet4Data = ReturnVegieCount(ThisIPData)
+        Sheet4.append(Sheet4Data)
     Sheet4Frame = pd.DataFrame(Sheet4,IPAddresses)
     Sheet4Frame = Sheet4Frame.swapaxes("columns","index")
-    Sheet4Frame.to_excel(writer,"Sheet 4")
+    Sheet4Name = "Sheet 4"
+    if UseCounterName:
+        Sheet4Name = "Sheet " + str(next(Counter))
+    Sheet4Frame.to_excel(writer,Sheet4Name)
     #print(Sheet4Frame)
-    return
+    return True
 #________________________________________________________________________________________
 def main():
     fo = DualSearch(probA=True)
     bar = DualSearch(probB=True)
+    
     sheetOneOutput, sheetThreeOutput, sheetFourOutput, sheetFiveOutput, IpAddresses = UniversalSort(ipList, printerTru=True)
 #________________________________________________________________________________________
 # Name: Leo Lee
+    MakeSheet1()
     _, _, _, _, Languages = UniversalSort(launageList)
-    MakeSheets2and4(IpAddresses, Languages, sheetOneOutput)
+    MakeSheets2(IpAddresses, Languages, sheetOneOutput)
+    Sheet4Done = MakeSheet4(IpAddresses, sheetOneOutput)
+    searchListOutput = IpAddresses
+    SheetCounter = count(5)
 #________________________________________________________________________________________
-    uniqueSearch = IpAddresses
     def Sheet5And6():
-        '''
-        Note: Sheet 5 isn't included here, yet.
-        It covers sheet six and includes an additional
-        language percentage comparison
-        (which is nice, but not one of the requirements).
-        
-        Leo
-        '''
         sheetFive = pd.DataFrame()
         counter = 0
 
@@ -241,14 +250,13 @@ def main():
             tempsheet = pd.DataFrame()
             tempsheet2 = pd.DataFrame()
             tempsheet["CROPS"] = sheetFiveOutput[counter].index
-            tempsheet2[IpAddresses[counter]] = sheetFiveOutput[counter].array
+            tempsheet2[searchListOutput[counter]] = sheetFiveOutput[counter].array
             sheetFive = pd.concat([sheetFive, tempsheet], axis=1)
             sheetFive = pd.concat([sheetFive, tempsheet2], axis=1)
             counter = counter + 1
 
         sheetName = random.randrange(1,100)
-        sheetFive.to_excel(writer, str(sheetName))
-
+        sheetFive.to_excel(writer, "Sheet " + str(next(SheetCounter)))
 
         sheetSix = pd.DataFrame()
         counter = 0
@@ -260,17 +268,19 @@ def main():
             tempsheet = pd.DataFrame()
             tempsheet2 = pd.DataFrame()
             tempsheet["CROPS"] = sheetFiveOutput[counter].index
-            tempsheet2[uniqueSearch[counter]] = sheetFiveOutput[counter].array
+            tempsheet2[searchListOutput[counter]] = sheetFiveOutput[counter].array
             sheetSix = pd.concat([sheetSix, tempsheet], axis=1)
             sheetSix = pd.concat([sheetSix, tempsheet2], axis=1)
             counter = counter + 1
 
         sheetName = random.randrange(1,100)
-        sheetSix.to_excel(writer, str(sheetName))
-
+        sheetSix.to_excel(writer, "Sheet " + str(next(SheetCounter)))
     Sheet5And6()
-
-    sheetOneOutput, sheetThreeOutput, sheetFourOutput, sheetFiveOutput, uniqueSearch = UniversalSort(launageList, printerTru=True)
+    sheetOneOutput, sheetThreeOutput, sheetFourOutput, sheetFiveOutput, searchListOutput = UniversalSort(launageList, printerTru=True)
+#________________________________________________________________________________________
+# Name: Leo Lee
+    MakeSheet4(searchListOutput, sheetOneOutput, Sheet4Done,SheetCounter)
+#________________________________________________________________________________________
     Sheet5And6()
 
     print("\n\n\n\n")
