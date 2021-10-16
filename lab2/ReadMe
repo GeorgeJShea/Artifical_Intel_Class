@@ -1,4 +1,5 @@
 KNN 
+Higher average accaurcy as compared to scikitlearns knn predictions though a slower by many margins keep that in mind while using this package
 
 edit the following line with your data path
 path = ('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/fruits_classification.xlsx')
