@@ -1,0 +1,54 @@
+import pandas as pd
+from sklearn.metrics import r2_score
+from sklearn.linear_model import LinearRegression as LR
+from sklearn.model_selection import train_test_split
+import os
+from sklearn.utils import shuffle
+
+def main():
+    PathLaunch()
+
+def PathLaunch():
+    #                                      Path brocken into chuncks seperated by ,
+    path = os.path.join(os.path.expanduser('~'), 'Desktop', 'Data', 'exam_scores.xlsx')
+    df = ExcelReader(path)
+    Primer(df)
+
+def Primer(df):
+    df = shuffle(df)    # shuffle prior to any testing consistent between loops
+    amount = len(df.head()) - 2 # Reason -2 due to 1 colloum being removed and 1 being reserved for testing
+    counter = 0
+    while counter < amount:
+        print("====================================================")
+        print("Test", counter + 1, " Removed")
+        outDf = df.drop(df.columns[counter], axis=1)    # Temporly drops 1 given set of data
+        Trainer(outDf) # runs trainer
+        counter = counter + 1
+    return None
+
+def Trainer(outDf):
+    x = outDf.iloc[:, :-1]
+    y = outDf.iloc[:, 2]
+    xTrain, xTest, yTrain, yTest = train_test_split(x, y, test_size=0.70)
+    LR2 = LR()
+    LR2.fit(xTrain, yTrain)
+    yPred = LR2.predict(xTest)
+
+    print(round(r2_score(yTest, yPred), 2))
+
+def ExcelReader(path):
+    extentsion = path.split(".")[1]
+
+    if (extentsion == "xlsx"):
+        path = pd.ExcelFile(path)
+        dataFramePrime = pd.read_excel(path)
+        return dataFramePrime
+    if (extentsion == "csv"):
+        dataFramePrime = pd.read_csv(path)
+        return dataFramePrime
+    else:
+        print("Unsupported File Type")
+        return pd.DataFrame.empty
+    return dataFramePrime
+
+main()
