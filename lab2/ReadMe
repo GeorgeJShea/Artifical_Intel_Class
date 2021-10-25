@@ -13,5 +13,8 @@ startData, EndData: intial starting point of data and end point
 KNear: how many k nearest neighbors it will grab it will iterate starting from that to 1
 path: set path to this currently supports xslm and csv
 
+Future
+Begging to develop multi threading for knn to improve preformance. 
+
 Built by george
 
