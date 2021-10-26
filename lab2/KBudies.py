@@ -2,19 +2,20 @@ import pandas as pd                         # Used for dataframes
 from sklearn.utils import shuffle           # Shuffles dataframe
 from math import sqrt                       # Knn calculation
 import numpy as np                          # Math calculation
-from matplotlib import pyplot as plt        # For plotting
+#from matplotlib import pyplot as plt        # For plotting
 import time                                 # Used for calculating duration of calculation
-
+import os
 
 #________________________________________________________________________________________
 # Name: George Shea     ßeta
 # Date Created: 6/10/21
-# Date Modified 8/10/21
+# Date Modified 26/10/21
 # Lab 2 find knn for give data
-# Version 2.21
+# Version 3.0
 #________________________________________________________________________________________
 
 # put your path here
+
 
 
 def Primer(k=None, dataStart=None, dataEnd=None, classifer=None, split=None, path=None):
@@ -53,7 +54,6 @@ def FindFriends(train, test, k=None, dataStart=None, dataEnd=None, classifer=Non
     # Goes through each item in test
     for index, rowTest in test.iterrows():
         # Resets the following values for each instance of test
-        topFriends = []
         friends = []
         friendsIndex = []
         trainCounter = 0
@@ -72,29 +72,36 @@ def FindFriends(train, test, k=None, dataStart=None, dataEnd=None, classifer=Non
 
             trainCounter = trainCounter + 1
 
-        # F is the nearest neighbor value, fI is its index in the larger train data set.
-        fI, f = np.array(friendsIndex), np.array(friends)
-        # Sorts F into shortest to longest distance and than matchs fI to that organzation
-        inds = f.argsort()
-        fI, f = fI[inds], f[inds]
-
-        #Gets top neighbors based on k
-        i = 0
-        while i <= k:
-            topFriends.append(train.iloc[fI[i], classifer])
-            i = i + 1
-
-        # Runs MostFrequent function will average the postion of same classifer and return the shorts average as its guess
-        guess = MostFrequent(topFriends, f[:k])
-
-        # If right + 1 else nothing
-        if(test.iloc[testCounter, classifer] == guess):
-            matchCount = matchCount + 1
-
+        correctGues = FindGuesses(friendsIndex, friends, train, classifer, test, testCounter, k)
         testCounter = testCounter + 1
+        matchCount = matchCount + correctGues
 
     # finally returns average
     return round(matchCount / len(test) * 100, 2)
+
+def FindGuesses(friendsIndex = None, friends = None, train = None, classifer = None, test = None, testCounter = None, k = None):
+    topFriends = []
+    # F is the nearest neighbor value, fI is its index in the larger train data set.
+    fI, f = np.array(friendsIndex), np.array(friends)
+    # Sorts F into shortest to longest distance and than matchs fI to that organzation
+    inds = f.argsort()
+    fI, f = fI[inds], f[inds]
+
+    #Gets top neighbors based on k
+    i = 0
+    while i <= k:
+        topFriends.append(train.iloc[fI[i], classifer])
+        i = i + 1
+
+    # Runs MostFrequent function will average the postion of same classifer and return the shorts average as its guess
+    guess = MostFrequent(topFriends, f[:k])
+
+    # If right + 1 else nothing
+    if(test.iloc[testCounter, classifer] == guess):
+        #print(guess, [testCounter])
+        return 1
+    else:
+        return 0
 
 def MostFrequent(listCount, fI):
     # Creates a tuple of f(knn distance) fI index
@@ -151,12 +158,12 @@ def ScreamingProcesser(iterations=None, kNear=None, startData=None, endData=None
         # Plot stuff
         averageList = averageList[::-1]
         averageList = [0] + averageList
-        plt.bar(range(kNearReset), averageList)
-        plt.xticks(range(0, kNearReset))
-        plt.title("K Nearest Neighbors")
-        plt.xlabel("How Many Neighbors")
-        plt.ylabel("Precents")
-        plt.show()
+        #plt.bar(range(kNearReset), averageList)
+        #plt.xticks(range(0, kNearReset))
+        #plt.title("K Nearest Neighbors")
+        #plt.xlabel("How Many Neighbors")
+        #plt.ylabel("Precents")
+        #plt.show()
 
     return averageList[1:len(averageList)]
 
@@ -166,12 +173,12 @@ def main():
     value =  int(input("Please enter iteration: \n    "))
     print("Loading... . ")
     print("_________________________________________________________")
-    path = ('C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/fruits_classification.xlsx')
+    path = os.path.join(os.path.expanduser('~'), 'Desktop', 'Data', 'fruits_classification.xlsx')
     averageList = ScreamingProcesser(iterations=value, classifer=1, startData=3, endData=6, kNear=10, split=.6, printVal=True, path=path)
     print("_________________________________________________________")
     index = max(averageList)
     print("Most Accurate KNN")
-    print("|| Neighbors || ", averageList.index(index), " || Average Accuracy || ", max(averageList), "%")
+    print("|| Neighbors || ", (averageList.index(index) + 1), " || Average Accuracy || ", max(averageList), "%")
     print("_________________________________________________________")
     later = time.time()
     print("Complete ||    || Time elasped || ", round((later - now)/60, 2), " Minutes")
