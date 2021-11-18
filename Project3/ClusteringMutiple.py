@@ -10,7 +10,7 @@ from matplotlib import pyplot as py
 # Date Created: 16/11/21
 # Date Modified 16/11/21
 # 2 diffrent methods comparedx
-# Version 0.0
+# Version 0.1
 #________________________________________________________________________________________
 
 
@@ -56,18 +56,14 @@ def KPrinter():
 def HPrinter():
     # https://scikit-learn.org/stable/modules/clustering.html
     data = Reader()
-
-    # "Classifer" is made out of sales and years in business
-    # You can choice any 2 you want. I choice years and buisness and sales as i thought that made sense
-    classifer = data.iloc[::, [2,3]]
-
+    # pass in raw data made a mistake in frist publish
     # You can choice between complete single or average, though in this istance we have been asked to use complete
-    linked = linkage(classifer, 'complete') # linkage preformce the clustering for us
-    dendrogram(linked, orientation='top', distance_sort='descending')   # organizes the coresponding into a pleasing shape
+    linked = linkage(data, 'complete') # linkage preformce the clustering for us
+    dendrogram(linked)   # organizes the coresponding into a pleasing shape
     plt.show()  # shows dendo gram
 
 
-# Experimental 
+# Experimental
 def DBSanPrinter():
     data = Reader()
     print("_____________________________________________")
@@ -76,13 +72,12 @@ def DBSanPrinter():
 
     clustering = DBSCAN(eps=.6, min_samples=4).fit(classifer)
     clustering.labels_
-    print(clustering.labels_)
+    print(clustering.n_features_in_)
 
-    py.plot(clustering.labels_)
+    py.plot(clustering.n_features_in_)
     py.plot(classifer)
     py.show()
 
-KPrinter()
+#KPrinter()
 HPrinter()
-
 #DBSanPrinter()
