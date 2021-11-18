@@ -15,54 +15,18 @@ import itertools
 pathTwo = "C:/Users/gshea/Desktop/School/Summer2021/Artifical/DataSets/experience_salary_data.csv"
 dataFramePrime = pd.read_csv(pathTwo)
 
-indepedent = dataFramePrime['YearsExperience'].values.tolist()                           # Gets ip for the people
-dependent = dataFramePrime['Salary'].values.tolist()  # Get langs for the people
+indepedent2 = dataFramePrime['YearsExperience'].values.tolist()                           # Gets ip for the people
+dependent2 = dataFramePrime['Salary'].values.tolist()  # Get langs for the people
 
-kNAverage = 0
+# refer to chart
+def KSplit(splitValue=None):
+    splitValue = round(len(indepedent2) / (splitValue - 1)) # gets number of items that will be in each section of k
 
-# Splits lists into given test and train data based on given precentage
-def Split(split = None, KSplit = None):
-    divsionPoint = round(len(indepedent) * split)
-
-    indiTrainA = indepedent[:divsionPoint]
-    indiTestA = indepedent[divsionPoint:]
-
-    depndiTrainB = dependent[:divsionPoint]
-    denpdiTestB = dependent[divsionPoint:]
-
-    # Returns split data to regexcalc
-    return indiTrainA, depndiTrainB, indiTestA, denpdiTestB
-
-def FourKSplit(PartA = None, PartB = None, PartC = None ):
-    print()
-    #   A B C
-    # 1 - - t
-    # 2 - t -
-    # 3 t - -
-    divsionPoint = round(len(indepedent) * .33)
-    divsionPoint2 = round(len(indepedent) * .66)
-
-    ''' functional eye sore
-    trainPartOneDependent = dependent[:divsionPoint] + dependent[divsionPoint:divsionPoint2]
-    trainPartTwoDependent = dependent[:divsionPoint] + dependent[divsionPoint2:]
-    trainPartThreeDependent = dependent[divsionPoint:divsionPoint2] + dependent[divsionPoint2:]
-
-    trainPartOneIndepedent = indepedent[:divsionPoint] + indepedent[divsionPoint:divsionPoint2]
-    trainPartTwoIndepedent = indepedent[:divsionPoint] + indepedent[divsionPoint2:]
-    trainPartThreeIndepedent = indepedent[divsionPoint:divsionPoint2] + indepedent[divsionPoint2:]
-    '''
-
-    if(PartA == True):
-        return indepedent[:divsionPoint] + indepedent[divsionPoint:divsionPoint2], dependent[:divsionPoint] + dependent[divsionPoint:divsionPoint2], indepedent[:divsionPoint], dependent[:divsionPoint]
-    elif(PartB == True):
-        return indepedent[:divsionPoint] + indepedent[divsionPoint2:], dependent[:divsionPoint] + dependent[divsionPoint2:], indepedent[divsionPoint:divsionPoint2], dependent[divsionPoint:divsionPoint2]
-    elif(PartC == True):
-        return indepedent[divsionPoint:divsionPoint2] + indepedent[divsionPoint2:], dependent[:divsionPoint] + dependent[divsionPoint2:], indepedent[divsionPoint2:], dependent[divsionPoint2:]
-    return
-
-def KSplit(splitValue = None):
-    splitValue = round(len(indepedent)/splitValue)
-    counter = splitValue
+    mseAverage = 0
+    rsmeAverage = 0
+    mseSciAverage = 0
+    rsmeSciAverage = 0
+    # visualization of the k-split
     # - a b c d f
     # 1 - - - - t
     # 2 - - - t -
@@ -70,131 +34,122 @@ def KSplit(splitValue = None):
     # 4 - t - - -
     # 5 t - - - -
 
-    listIndependent = [indepedent[i:i + splitValue] for i in range(0, len(indepedent), splitValue)]
-    listDepedent = [dependent[i:i + splitValue] for i in range(0, len(dependent), splitValue)]
-    listIndependentReset = listIndependent
-    listDepedentReset = listDepedent
+    # splits depedent and independent into lists based on splitvalue
+    listIndependent = [indepedent2[i:i + splitValue] for i in range(0, len(indepedent2), splitValue)]
+    listDepedent = [dependent2[i:i + splitValue] for i in range(0, len(dependent2), splitValue)]
 
-    print(listIndependent)
+    # counter
+    counter = len(listIndependent) - 1
+    inverseCounter = 1 # used for printing out things
     for x in listIndependent:
-        testIndependent = listIndependent.pop(counter)
-        testDependent = listDepedent.pop(counter)
+        print("=============K", inverseCounter)
 
-        list(itertools.chain.from_iterable(listIndependent.pop(counter)))
-        list(itertools.chain.from_iterable(listDepedent.pop(counter)))
-        return list(itertools.chain.from_iterable(listIndependent.pop(counter))), list(itertools.chain.from_iterable(listDepedent.pop(counter))), testIndependent, testDependent
+        testIndependent = listIndependent.copy().pop(counter)   # creates the training set
+        testDependent = listDepedent.copy().pop(counter)        # creates the test set
 
-    # return these values
-    # 1 independent train
-    # 2 dependent train
-    # 3 independent test
-    # 4 dependent test
+        inverseCounter = inverseCounter + 1
+        counter = counter - 1
 
-# Does the regex calculations and compares it to the scikit-learn
-def RegexCalc(precent = None, PartA = None, PartB = None, PartC = None ):
-    #Indepedent, Dependent are the training data
-    #While The Tests are the test data          Both are already split into there respective groups
+        # Runs msi, rsme cacluations and returms them to these temp values
+        mseAverageTemp, rsmeAverageTemp, mseSciAverageTemp, rsmeSciAverageTemp = RegexCalc(list(itertools.chain.from_iterable(listIndependent)), list(itertools.chain.from_iterable(listDepedent)), testIndependent, testDependent)
+        # appends the temp values to there solid lists
+        mseAverage, rsmeAverage, mseSciAverage, rsmeSciAverage = mseAverage + mseAverageTemp, rsmeAverage + rsmeAverageTemp, mseSciAverage + mseSciAverageTemp, rsmeSciAverage + rsmeSciAverageTemp
 
-    if(precent != None):
-        indepedent, dependent, indepedentTest, dependentTest = Split(precent)
-    if(PartA == True):
-        indepedent, dependent, indepedentTest, dependentTest = FourKSplit(PartA=True)
-    elif(PartB == True):
-        indepedent, dependent, indepedentTest, dependentTest = FourKSplit(PartB=True)
-    elif(PartC == True):
-        indepedent, dependent, indepedentTest, dependentTest = FourKSplit(PartC=True)
+    # just gets the average of them
+    mseAverage, rsmeAverage, mseSciAverage, rsmeSciAverage = mseAverage/len(listIndependent), rsmeAverage/len(listIndependent), mseSciAverage/len(listIndependent), rsmeSciAverage/len(listIndependent)
+    print("=============K", inverseCounter)
+    print("################################################################")
+    print("K-", len(listIndependent) + 1, "Average MSE Score:              ", round(mseAverage, 2))
+    print("K-", len(listIndependent) + 1, "Average RSME Score:             ", round(rsmeAverage, 2))
+    print("################################################################")
 
-    indiMean = 0
-    dependiMean = 0
-    counter = 0
-    # Calculates Mean for indipedent and dependent
-    for x in indepedent:
-        indiMean = indepedent[counter] + indiMean
-        dependiMean = dependent[counter] + dependiMean
-        counter = counter + 1
-    indiMean = indiMean / len(indepedent)
-    dependiMean = dependiMean / len(dependent)
+    print("K-", len(listIndependent) + 1, "Average MSE Score Scikit-learn: ", round(mseSciAverage, 2))
+    print("K-", len(listIndependent) + 1, "Average RSME Score Scikit-learn: ", round(rsmeSciAverage, 2))
+    print("################################################################")
+    print("\n\n")
 
-    # calculates Slope
-    partA = 0 # (Xi -x ) * (Yi - x) Index of independent(x) in mean of independent(x) * Index of dependent(x) in mean of dependent(x)
-    partB = 0 # (Xi -  x)^2 Index of independent(x) in mean of independent(x) sqaured
-    counter = 0
-    for x in indepedent:
-        partA = partA + (indepedent[counter] - indiMean) * (dependent[counter] - dependiMean) # denomator
-        partB = partB + (indepedent[counter] - indiMean)**2                                   # numartor
-        counter = counter + 1
+def RegexCalc(indepedent, dependent, indepedentTest, dependentTest):
+        # Indepedent, Dependent are the training data
+        # While The Tests are the test data          Both are already split into there respective groups
 
-    slope = partA / partB   # Generates slope
-
-    intercept = dependiMean - slope * indiMean  # Generets intercept
-
-    # calculates Pearsons R Score
-    counter = 0
-    RTop = 0
-    RBottom = 0
-    for x in indepedent:
-        RTop = RTop + ((indepedent[counter] - indiMean) * (dependent[counter] - dependiMean))
-        RBottom = RBottom + math.sqrt(((indepedent[counter] - indiMean)**2 * (dependent[counter] - dependiMean)**2))
-    R = RTop/RBottom
-
-    #"Predicts"
-    def Predict():
+        indiMean = 0
+        dependiMean = 0
         counter = 0
-        total = 0
-        totalPrecent = 0
-        outputArray = [] # Grabs each prediction
-        for x in dependentTest:
-            output = slope * indepedentTest[counter] + intercept    # prediction is output
-            outputArray.append(output)
+        # Calculates Mean for indipedent and dependent
+        for x in indepedent:
+            indiMean = indepedent[counter] + indiMean
+            dependiMean = dependent[counter] + dependiMean
+            counter = counter + 1
+        indiMean = indiMean / len(indepedent)
+        dependiMean = dependiMean / len(dependent)
 
-            total = total + (output - dependentTest[counter])**2    # Generates MSE Score onse finished looping
-
-            totalPrecent = totalPrecent + output/abs(dependentTest[counter])    # Generates Average Precentage off prediction
+        # calculates Slope
+        partA = 0  # (Xi -x ) * (Yi - x) Index of independent(x) in mean of independent(x) * Index of dependent(x) in mean of dependent(x)
+        partB = 0  # (Xi -  x)^2 Index of independent(x) in mean of independent(x) sqaured
+        counter = 0
+        for x in indepedent:
+            partA = partA + (indepedent[counter] - indiMean) * (dependent[counter] - dependiMean)  # denomator
+            partB = partB + (indepedent[counter] - indiMean) ** 2  # numartor
             counter = counter + 1
 
-        avgPrediction = totalPrecent/len(dependentTest) * 100   # Turns Average Prediction into prectentage
+        slope = partA / partB  # Generates slope
 
-        # Detirmins if guess over or under and shows accordingly
-        if(avgPrediction >= 100):
-            avgPrediction = avgPrediction - 100
-            print("On Average Predicts:                   ", round(avgPrediction, 2), "% Over")
-        elif(avgPrediction <= 100):
-            avgPrediction =  100 - avgPrediction
-            print("On Average Predicts:                   ", round(avgPrediction, 2), "% Under")
-        print("________________________________________________________________")
-        print("MSE Score:              ", round( (total / (len(dependentTest))), 2 ))
-        print("RSME Score:             ", round((math.sqrt(total / (len(dependentTest)))),2))
-        print("________________________________________________________________")
+        intercept = dependiMean - slope * indiMean  # Generets intercept
 
-        print("MSE Score Scikit-learn: ", round(MSE(dependentTest, outputArray), 2))
-        print("RSME Score Scikit-learn: ", round(math.sqrt(MSE(dependentTest, outputArray)), 2))
-        print("________________________________________________________________")
-        print("\n\n")
-    Predict()
+        # calculates Pearsons R Score
+        counter = 0
+        RTop = 0
+        RBottom = 0
+        for x in indepedent:
+            RTop = RTop + ((indepedent[counter] - indiMean) * (dependent[counter] - dependiMean))
+            RBottom = RBottom + math.sqrt(
+                ((indepedent[counter] - indiMean) ** 2 * (dependent[counter] - dependiMean) ** 2))
+        R = RTop / RBottom
+
+        # "Predicts"
+        def Predict():
+            counter = 0
+            total = 0
+            totalPrecent = 0
+            outputArray = []  # Grabs each prediction
+            for x in dependentTest:
+                output = slope * indepedentTest[counter] + intercept  # prediction is output
+                outputArray.append(output)
+
+                total = total + (output - dependentTest[counter]) ** 2  # Generates MSE Score onse finished looping
+
+                totalPrecent = totalPrecent + output / abs(dependentTest[counter])  # Generates Average Precentage off prediction
+                counter = counter + 1
+
+            avgPrediction = totalPrecent / len(dependentTest) * 100  # Turns Average Prediction into prectentage
+
+            # Detirmins if guess over or under and shows accordingly
+            if (avgPrediction >= 100):
+                avgPrediction = avgPrediction - 100
+                print("On Average Predicts:                   ", round(avgPrediction, 2), "% Over")
+            elif (avgPrediction <= 100):
+                avgPrediction = 100 - avgPrediction
+                print("On Average Predicts:                   ", round(avgPrediction, 2), "% Under")
+
+            print("________________________________________________________________")
+            print("MSE Score:              ", round((total / (len(dependentTest))), 2))
+            print("RSME Score:             ", round((math.sqrt(total / (len(dependentTest)))), 2))
+            print("________________________________________________________________")
+
+            print("MSE Score Scikit-learn: ", round(MSE(dependentTest, outputArray), 2))
+            print("RSME Score Scikit-learn: ", round(math.sqrt(MSE(dependentTest, outputArray)), 2))
+            print("________________________________________________________________")
+            print("\n\n")
+            return round(total / len(dependentTest), 2), round(math.sqrt(total / len(dependentTest)), 2), round(MSE(dependentTest, outputArray), 2), round(math.sqrt(MSE(dependentTest, outputArray)), 2)
+        one, two, three, four = Predict()
+        return one, two, three, four
 
 def main():
     print()
-    print("80/20 Split ")
+    print("KN Split ")
     print("################################################################")
-    RegexCalc(.80)
-    print()
-    print("70/30 Split ")
-    print("################################################################")
-    RegexCalc(.70)
-
-    print(" - - t ")
-    print("################################################################")
-    RegexCalc(PartA=True)
-
-    print(" - t - ")
-    print("################################################################")
-    RegexCalc(PartB=True)
-
-    print(" t - - ")
-    print("################################################################")
-    RegexCalc(PartC=True)
-
-    KSplit(2)
-    KSplit(3)
-    KSplit(5)
+    value = int(input("Please Enter a Value: \n"))
+    if(value <= 0):
+        value = 4
+    KSplit(value)
 main()
