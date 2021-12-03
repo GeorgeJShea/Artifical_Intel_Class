@@ -1,0 +1,81 @@
+from PIL import Image
+import numpy as np
+from sklearn.cluster import KMeans
+import os
+from matplotlib import pyplot as plt
+from PIL import Image
+
+#________________________________________________________________________________________
+# Name: George Shea     ßeta
+# Date Created: 1/12/21
+# Date Modified 2/12/21
+# Combinds near by colors into one same color
+# Version 1.0
+#________________________________________________________________________________________
+
+
+
+def Reader():
+    # Edit This To Change Path On Your Local Machine To Wear The file is Located
+    # 'Destop' comma  'exampleFolder comma AnotherFolder Comma AtualData.csv
+    path = os.path.join(os.path.expanduser('~'), 'Desktop', 'Snippets', 'Pictures' , 'WorkingCode.png')
+    imageRefreance = Image.open(path)
+    imageResized = imageRefreance.resize((256,256))
+
+    pixels = list(imageResized.getdata())
+    #pixels = np.reshape(imageRefreance, (imageRefreance.shape[0] * imageRefreance.shape[1], imageRefreance.shape[2]))  # reshape the array from 2d to 3d
+    #print(pixels)
+
+    plt.imshow(imageResized)
+    plt.show()
+    name = path.split("/")[-1:]
+    name = name[0].replace("[", "")
+
+    return(pixels, name)
+def IPrinter(data, name, dataPrint = None):
+    hold = []
+
+    pixelCount = len(data)
+    if(type(data) == type(hold)):
+        setOf = set(data)
+        uniquePixleCount = len(setOf)
+    else:
+        items, counts = np.unique(data, return_counts=True)
+        result = np.column_stack((items, counts))
+        uniquePixleCount = str(result.shape).split(",")[0].replace("(", "")
+
+
+    print("Name: ", name , " Pixles: ", pixelCount, "Unique Colours: ", uniquePixleCount)
+    print("______________________________________________________\n")
+    if(dataPrint == True):
+        for item in data:
+            print(item)
+
+def PerformKMeans(image,clusters):  # thanks chris for this bit of code
+    if (clusters != 1):
+        clusters = clusters - 1
+
+    model = KMeans(n_clusters=clusters).fit(image)
+    newImage = np.copy(image)
+
+    for pixle,cluster in enumerate(model.labels_):
+        newImage[pixle] = model.cluster_centers_[cluster]
+    return newImage
+
+def ShowImage(data):
+    data = data.reshape(512, 512)
+
+    plt.imshow(data)
+    plt.show()
+
+def main():
+    data, name = Reader()
+    newData = PerformKMeans(data, 4)
+
+    IPrinter(data, name, dataPrint=False)
+    IPrinter(newData, name, dataPrint=False)
+
+    ShowImage(newData)
+
+if __name__ == '__main__':
+    main()
