@@ -1,0 +1,73 @@
+
+import os
+import pandas as pd
+import numpy as np
+from sklearn.cluster import KMeans
+from collections import Counter
+
+
+sorter = ["-1", "0", "1", "2" , "3", "4", "5", "6", "7", "8", "9", "10"]
+def ImportData(path):
+    extentsion = path.split(".")[1]
+    if (extentsion == "xlsx"):
+        path = pd.ExcelFile(path)
+        dataFramePrime = pd.read_excel(path)
+        return  dataFramePrime
+    if (extentsion == "csv"):
+        dataFramePrime = pd.read_csv(path)
+        return dataFramePrime
+
+
+def QuestionOne():
+    print()
+    data = ImportData(os.path.join(os.path.expanduser('~'), 'Desktop', 'Data', 'credit_card_dataset.csv'))
+
+    print("__________________________________________________________________________________")
+    data = data.replace(r'^\s*$', np.nan, regex=True)
+    droppedData = data.dropna()
+    droppedData = droppedData.iloc[: , 1:]
+
+    #kmeans = KMeans(n_clusters=8, random_state=0).fit(droppedData)
+    kmeans = KMeans(n_clusters = 8, init = 'k-means++', max_iter = 300, n_init = 10, random_state = 0).fit(droppedData)
+
+    print("Question 1: ")
+    print("Groups")
+    kmeansList = []
+    for x in kmeans.labels_:
+        print(x, end="")
+        kmeansList.append(x.item())
+    print()
+    print("Grouping Counts")
+    print(str(Counter(kmeansList)).replace("Counter", ""))
+
+    print('''
+    Question 1 Refleciton
+    Splitting up the data into 8 clusters resulted in the following
+    0 having 440 people, 1 having 1651 people 2 having 328 etc... 
+    Group 5 represented a group of people consistently buying products Though not making many large purchases
+    Group 5 being the largest making sense as most people are not buyings big things that often
+    Group 7 being the smallest at 23 represented who use their account infrequently 
+
+
+    I used the same exact foroumla as the author provided to increase the similarity in our data
+    I looked at my grouping for 4 and felt like it fit his discription 
+    In terms of how my data was clustered I think it lined up fairly well with what his data showed
+    Though it may have lost some accuracy to the removal of data points.
+    
+    ''')
+
+def QuestionTwo():
+    print()
+    data = ImportData(os.path.join(os.path.expanduser('~'), 'Desktop', 'Data', 'Titanic_dataset.csv'))
+    data = data[data.Sex == "Male"]
+    data = data[data.Age == "Adult"]
+    data = data[data.Class == "First"]
+
+    data2 = data[data.Survived == "Yes"]
+
+    print("Question 2: ")
+    print("Survivale rate for an adult first class male is: ", round(len(data2)/len(data) * 100 , 2), end="") #also checked for females and its at 97% for that group
+    print( "%")
+
+QuestionOne()
+QuestionTwo()
